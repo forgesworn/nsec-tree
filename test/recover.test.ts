@@ -30,4 +30,16 @@ describe('recover', () => {
     const result = recover(root, [])
     expect(result.size).toBe(0)
   })
+
+  it('rejects zero scanRange', () => {
+    expect(() => recover(root, ['social'], 0)).toThrow('positive integer')
+  })
+
+  it('rejects negative scanRange', () => {
+    expect(() => recover(root, ['social'], -1)).toThrow('positive integer')
+  })
+
+  it('rejects NaN scanRange', () => {
+    expect(() => recover(root, ['social'], NaN)).toThrow('positive integer')
+  })
 })

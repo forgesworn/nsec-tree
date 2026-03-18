@@ -30,6 +30,9 @@ function buildContext(purpose: string, index: number): Uint8Array {
 }
 
 export function deriveChildKey(root: Uint8Array, purpose: string, index = 0): DerivedKey {
+  if (!Number.isInteger(index) || index < 0 || index > MAX_INDEX) {
+    throw new NsecTreeError(`Index must be an integer in [0, ${MAX_INDEX}], got ${index}`)
+  }
   validatePurpose(purpose)
 
   let currentIndex = index

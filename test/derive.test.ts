@@ -58,6 +58,22 @@ describe('deriveChildKey', () => {
     expect(() => deriveChildKey(root, '')).toThrow()
     expect(() => deriveChildKey(root, 'bad\0purpose')).toThrow()
   })
+
+  it('rejects negative index', () => {
+    expect(() => deriveChildKey(root, 'social', -1)).toThrow('integer')
+  })
+
+  it('rejects floating-point index', () => {
+    expect(() => deriveChildKey(root, 'social', 0.5)).toThrow('integer')
+  })
+
+  it('rejects NaN index', () => {
+    expect(() => deriveChildKey(root, 'social', NaN)).toThrow('integer')
+  })
+
+  it('rejects index exceeding uint32 max', () => {
+    expect(() => deriveChildKey(root, 'social', 4294967296)).toThrow('integer')
+  })
 })
 
 describe('derive (public API)', () => {
