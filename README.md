@@ -102,6 +102,7 @@ Verify a `LinkageProof`. Returns `boolean`.
 | `nsec-tree/core` | fromNsec, derive, recover, zeroise | No |
 | `nsec-tree/mnemonic` | fromMnemonic | Yes |
 | `nsec-tree/proof` | Linkage proofs | No |
+| `nsec-tree/persona` | Persona derivation, two-level hierarchy, recovery | No |
 
 Use `nsec-tree/core` if you only need nsec-based derivation — it avoids pulling in BIP-32/39 dependencies.
 
@@ -113,6 +114,108 @@ Use `nsec-tree/core` if you only need nsec-based derivation — it avoids pullin
 - **Child keys:** `HMAC-SHA256(tree_root, "nsec-tree\0" || purpose || "\0" || index_be32)`
 - **Linkage proofs:** BIP-340 Schnorr signatures over attestation strings
 - See `PROTOCOL.md` for the full derivation spec with test vectors
+
+---
+
+## Personas
+
+A persona is a named Nostr identity derived from your master secret using the
+convention `nostr:persona:{name}`. Each persona gets its own keypair — suitable
+for a separate kind-0 profile — and is unlinkable to other personas by default.
+
+### Deriving personas
+
+```typescript
+import { fromMnemonic } from 'nsec-tree'
+import { derivePersona } from 'nsec-tree/persona'
+
+const root = fromMnemonic('abandon abandon ... about')
+const personal = derivePersona(root, 'personal')
+const bitcoiner = derivePersona(root, 'bitcoiner')
+const work = derivePersona(root, 'work')
+
+console.log(personal.identity.npub)  // npub1...
+console.log(bitcoiner.identity.npub) // npub1... (different, unlinkable)
+```
+
+### Two-level hierarchy
+
+`deriveFromPersona` creates sub-identities beneath a persona. This is useful
+for group signing keys — each group gets an isolated keypair derived from the
+persona, not the master.
+
+```typescript
+import { deriveFromPersona } from 'nsec-tree/persona'
+
+const meetup = deriveFromPersona(bitcoiner, 'canary:group:local-meetup')
+const conference = deriveFromPersona(bitcoiner, 'canary:group:btcpp-2026')
+```
+
+The hierarchy is: **master → persona → group identity**. Compromising a group
+key does not expose the persona key, and compromising a persona does not expose
+the master.
+
+### Recovery
+
+`recoverPersonas` re-derives all personas from a mnemonic by scanning a list of
+known names. When no names are provided it uses `DEFAULT_PERSONA_NAMES`:
+`personal`, `bitcoiner`, `work`, `social`, `anonymous`.
+
+```typescript
+import { recoverPersonas, DEFAULT_PERSONA_NAMES } from 'nsec-tree/persona'
+
+const root = fromMnemonic('abandon abandon ... about')
+const recovered = recoverPersonas(root, DEFAULT_PERSONA_NAMES, 2)
+
+for (const [name, personas] of recovered) {
+  console.log(`${name}: ${personas.length} indices scanned`)
+}
+```
+
+Recovery is deterministic — the same mnemonic always produces the same personas.
+You only need to know (or conventionalise) the persona names to scan.
+
+### Rotation
+
+If a persona is compromised, derive it at a higher index:
+
+```typescript
+const bitcoinerV0 = derivePersona(root, 'bitcoiner', 0) // compromised
+const bitcoinerV1 = derivePersona(root, 'bitcoiner', 1) // replacement
+```
+
+Use a blind linkage proof to prove continuity — the new persona is controlled by
+the same master — without revealing which derivation slot was used:
+
+```typescript
+import { createBlindProof, verifyProof } from 'nsec-tree/proof'
+
+const proof = createBlindProof(root, bitcoinerV1.identity)
+verifyProof(proof) // true — same master, new identity
+```
+
+### Ecosystem integration
+
+nsec-tree personas are designed to compose with other libraries:
+
+- **canary-kit** — `deriveFromPersona(persona, 'canary:group:...')` produces
+  the group signing key that canary-kit uses for encrypted location beacons,
+  duress alerts, and liveness checks.
+- **spoken-token** — bind a spoken verification token to a persona's public key
+  for identity confirmation over voice calls.
+
+### Security model
+
+Compromise at different levels has different blast radii:
+
+| Compromised | Impact | Mitigation |
+|-------------|--------|------------|
+| Group key | One group identity exposed | Rotate the group key (new purpose or index) |
+| Persona key | All group keys under that persona derivable | Rotate the persona (increment index), issue linkage proof |
+| Master secret | All personas and group keys derivable | Rotate the mnemonic, migrate all identities |
+
+The two-level hierarchy ensures that a group key compromise does not escalate to
+the persona, and a persona compromise does not escalate to the master.
 
 ---
 
@@ -128,6 +231,7 @@ Runnable examples in the [`examples/`](examples/) directory:
 | [linkage-proofs.ts](examples/linkage-proofs.ts) | Blind and full ownership proofs |
 | [bot-fleet.ts](examples/bot-fleet.ts) | 10 bots from one seed |
 | [nostr-event-signing.ts](examples/nostr-event-signing.ts) | Sign a kind-1 event with nostr-tools |
+| [persona.ts](examples/persona.ts) | Persona derivation, groups, rotation, recovery |
 
 Run any example: `npx tsx examples/<name>.ts`
 
