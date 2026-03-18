@@ -30,7 +30,8 @@
   "files": [
     "dist",
     "LICENSE",
-    "PROTOCOL.md"
+    "PROTOCOL.md",
+    "llms.txt"
   ],
   "scripts": {
     "build": "tsc",

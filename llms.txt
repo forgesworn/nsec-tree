@@ -1,0 +1,52 @@
+# nsec-tree
+
+> Nostr developers managing multiple identities need deterministic key derivation, but NIP-06 only derives a single key from a mnemonic. nsec-tree derives unlimited unlinkable sub-identities from one master secret, with optional linkage proofs for selective disclosure.
+
+nsec-tree is for Nostr application developers who need per-purpose or per-context identities — social, commerce, fleet management, throwaway — all recoverable from a single mnemonic or existing nsec. Unlike random key generation, every identity is deterministic and recoverable. Unlike BIP-32 public derivation, child identities are unlinkable by default.
+
+Zero custom crypto. All primitives from audited @noble/@scure libraries.
+
+## Getting Started
+
+```bash
+npm install nsec-tree
+```
+
+```typescript
+import { fromMnemonic, derive } from 'nsec-tree'
+
+const root = fromMnemonic('your twelve word mnemonic phrase here ...')
+const social = derive(root, 'social')        // purpose-tagged identity
+const commerce = derive(root, 'commerce')     // different, unlinkable
+console.log(social.npub)   // npub1...
+console.log(commerce.npub) // npub1... (no observer can link these)
+root.destroy() // zero secret material
+```
+
+## Key Concepts
+
+- **TreeRoot** — opaque handle created from a mnemonic (`fromMnemonic`) or existing nsec (`fromNsec`). Holds the master secret. Call `destroy()` when done.
+- **Identity** — a derived child with `nsec`, `npub`, `privateKey`, `publicKey`, `purpose`, and `index`. Each is a fully independent secp256k1 keypair.
+- **Purpose string** — human-readable derivation tag (e.g. `"social"`, `"trott:rider"`, `"402:api:prod"`). Different purposes produce different, unlinkable keys.
+- **Linkage proof** — BIP-340 Schnorr attestation that a master owns a child identity. Blind proofs hide the derivation slot; full proofs reveal it.
+- **Recovery** — scan known purpose strings to re-derive all identities from the master secret.
+
+## API Surface
+
+| Function | Description |
+|----------|-------------|
+| `fromMnemonic(mnemonic, passphrase?)` | Create TreeRoot from BIP-39 mnemonic |
+| `fromNsec(nsec)` | Create TreeRoot from bech32 nsec or raw bytes |
+| `derive(root, purpose, index?)` | Derive a child Identity |
+| `recover(root, purposes, scanRange?)` | Scan purposes x indices for recovery |
+| `zeroise(identity)` | Zero the private key bytes |
+| `createBlindProof(root, child)` | Prove ownership without revealing derivation slot |
+| `createFullProof(root, child)` | Prove ownership with purpose and index |
+| `verifyProof(proof)` | Verify a LinkageProof |
+
+Subpath exports for minimal dependencies: `nsec-tree/core` (no BIP-32/39), `nsec-tree/proof` (proofs only), `nsec-tree/mnemonic` (fromMnemonic only).
+
+## Optional
+
+- [PROTOCOL.md](https://github.com/forgesworn/nsec-tree/blob/main/PROTOCOL.md): Full derivation specification with byte-level format and frozen test vectors
+- [README.md](https://github.com/forgesworn/nsec-tree/blob/main/README.md): Quick start, API reference, security model
