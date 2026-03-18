@@ -29,6 +29,10 @@
     "./persona": {
       "types": "./dist/persona-barrel.d.ts",
       "import": "./dist/persona-barrel.js"
+    },
+    "./encoding": {
+      "types": "./dist/encoding-barrel.d.ts",
+      "import": "./dist/encoding-barrel.js"
     }
   },
   "files": [
