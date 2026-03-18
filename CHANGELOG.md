@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/forgesworn/nsec-tree/compare/v1.3.1...v1.3.2) (2026-03-18)
+
+
+### Bug Fixes
+
+* **event:** reject proof events with missing or mismatched p tag ([4f5b034](https://github.com/forgesworn/nsec-tree/commit/4f5b0349e3945739b11437ab5b187118634c7b7c))
+
 ## [1.3.1](https://github.com/forgesworn/nsec-tree/compare/v1.3.0...v1.3.1) (2026-03-18)
 
 
