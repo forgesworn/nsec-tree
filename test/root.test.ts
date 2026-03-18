@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { schnorr } from '@noble/curves/secp256k1.js'
-import { fromNsec, createTreeRoot } from '../src/root-nsec.js'
+import { fromNsec } from '../src/root-nsec.js'
 import { encodeNsec, decodeNpub } from '../src/encoding.js'
 import { getSecret } from '../src/types.js'
 
