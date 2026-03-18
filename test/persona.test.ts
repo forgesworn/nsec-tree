@@ -156,8 +156,8 @@ describe('recoverPersonas', () => {
 })
 
 describe('subpath export', () => {
-  it('exports from nsec-tree/persona', async () => {
-    const mod = await import('nsec-tree/persona')
+  it('exports from persona barrel', async () => {
+    const mod = await import('../src/persona-barrel.js')
     expect(typeof mod.derivePersona).toBe('function')
     expect(typeof mod.deriveFromPersona).toBe('function')
     expect(typeof mod.recoverPersonas).toBe('function')
