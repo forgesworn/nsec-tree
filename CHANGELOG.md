@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/forgesworn/nsec-tree/compare/v1.1.0...v1.2.0) (2026-03-18)
+
+
+### Features
+
+* add encoding subpath export for NIP-19 utilities ([6068770](https://github.com/forgesworn/nsec-tree/commit/606877091782b079d462b37cf7262c3a6074868f))
+
 # [1.1.0](https://github.com/forgesworn/nsec-tree/compare/v1.0.0...v1.1.0) (2026-03-18)
 
 
