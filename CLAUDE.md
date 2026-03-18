@@ -25,6 +25,7 @@ Deterministic Nostr sub-identity derivation library.
 - `src/root-mnemonic.ts` — TreeRoot creation from BIP-39 mnemonic
 - `src/recover.ts` — scan-based identity recovery
 - `src/proof.ts` — BIP-340 Schnorr linkage proofs
+- `src/event.ts` — NIP-78 Kind 30078 event conversion (toUnsignedEvent/fromEvent)
 
 ## Subpath exports
 
@@ -32,6 +33,7 @@ Deterministic Nostr sub-identity derivation library.
 - `nsec-tree/core` — no BIP-32/39 deps (fromNsec, derive, recover, zeroise)
 - `nsec-tree/mnemonic` — fromMnemonic only
 - `nsec-tree/proof` — linkage proofs only
+- `nsec-tree/event` — NIP-78 event conversion (toUnsignedEvent, fromEvent, constants)
 
 ## Design spec
 
