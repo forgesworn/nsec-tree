@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'vitest'
+import { finalizeEvent, verifyEvent } from 'nostr-tools'
 import { NSEC_TREE_EVENT_KIND, NSEC_TREE_D_PREFIX, toUnsignedEvent, fromEvent } from '../src/event.js'
 import { fromNsec } from '../src/root-nsec.js'
 import { derive } from '../src/derive.js'
 import { createFullProof, createBlindProof, verifyProof } from '../src/proof.js'
-import { NsecTreeError } from '../src/types.js'
+import { NsecTreeError, getSecret } from '../src/types.js'
 
 describe('event constants', () => {
   it('exports NIP-78 kind', () => {
@@ -144,5 +145,29 @@ describe('fromEvent', () => {
       event.tags = event.tags.filter(t => t[0] !== 'purpose')
       expect(() => fromEvent(event)).toThrow(NsecTreeError)
     })
+  })
+})
+
+describe('nostr-tools integration', () => {
+  it('produces a valid signed Nostr event when finalised with nostr-tools', () => {
+    const root = fromNsec(new Uint8Array(32).fill(0xab))
+    const child = derive(root, 'social', 0)
+    const proof = createFullProof(root, child)
+    const unsigned = toUnsignedEvent(proof)
+
+    // getSecret retrieves the HMAC-derived tree root secret from the WeakMap.
+    // This is the actual signing key whose pubkey matches proof.masterPubkey.
+    // Using the raw 0xab bytes directly would produce a different pubkey
+    // because fromNsec runs HMAC-SHA256(raw, "nsec-tree-root") internally.
+    const secret = getSecret(root)
+    const signed = finalizeEvent(unsigned, secret)
+
+    expect(signed.id).toHaveLength(64)
+    expect(signed.sig).toHaveLength(128)
+    expect(verifyEvent(signed)).toBe(true)
+
+    // The linkage proof inside is still valid
+    const restored = fromEvent(signed)
+    expect(verifyProof(restored)).toBe(true)
   })
 })
