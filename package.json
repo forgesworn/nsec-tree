@@ -1,6 +1,6 @@
 {
   "name": "nsec-tree",
-  "version": "0.0.0-development",
+  "version": "1.0.0",
   "description": "Deterministic Nostr sub-identity derivation from a single master secret",
   "type": "module",
   "main": "./dist/index.js",
