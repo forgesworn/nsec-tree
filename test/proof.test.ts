@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { fromNsec } from '../src/root-nsec.js'
 import { derive } from '../src/derive.js'
 import { createBlindProof, createFullProof, verifyProof } from '../src/proof.js'
+import { bytesToHex } from '../src/encoding.js'
 
 describe('linkage proofs', () => {
   const root = fromNsec(new Uint8Array(32).fill(0xab))
@@ -54,6 +55,19 @@ describe('linkage proofs', () => {
     it('rejects proof with wrong master pubkey', () => {
       const proof = createBlindProof(root, child)
       const tampered = { ...proof, masterPubkey: '00'.repeat(32) }
+      expect(verifyProof(tampered)).toBe(false)
+    })
+
+    it('rejects proof with mismatched child pubkey field', () => {
+      const proof = createBlindProof(root, child)
+      const otherChild = derive(root, 'social', 1)
+      const tampered = { ...proof, childPubkey: bytesToHex(otherChild.publicKey) }
+      expect(verifyProof(tampered)).toBe(false)
+    })
+
+    it('rejects full proof with mismatched purpose field', () => {
+      const proof = createFullProof(root, child)
+      const tampered = { ...proof, purpose: 'commerce' }
       expect(verifyProof(tampered)).toBe(false)
     })
   })

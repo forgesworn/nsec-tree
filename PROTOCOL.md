@@ -228,6 +228,9 @@ signature = schnorr_sign(utf8(attestation), tree_root)
 Verification:
 
 ```
+expected_attestation = canonical_attestation_from_fields(proof)
+if expected_attestation != proof.attestation:
+    return false
 valid = schnorr_verify(signature, utf8(attestation), master_xonly_pub)
 ```
 
@@ -247,6 +250,10 @@ A serialised linkage proof contains:
 | `signature` | string | BIP-340 Schnorr signature (lowercase hex, 128 chars) |
 
 Proofs are serialised as JSON for exchange between parties.
+
+Verifiers MUST treat the attestation string as canonical. The duplicated JSON
+fields are for convenience only and MUST exactly match the canonical
+attestation; otherwise the proof is invalid.
 
 ## 6. Test Vectors
 

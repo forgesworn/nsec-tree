@@ -3,8 +3,7 @@ import { schnorr } from '@noble/curves/secp256k1.js'
 import { fromNsec } from '../src/root-nsec.js'
 import { fromMnemonic } from '../src/root-mnemonic.js'
 import { HDKey } from '@scure/bip32'
-import { mnemonicToSeedSync, generateMnemonic } from '@scure/bip39'
-import { wordlist } from '@scure/bip39/wordlists/english.js'
+import { mnemonicToSeedSync } from '@scure/bip39'
 import { encodeNsec, decodeNpub } from '../src/encoding.js'
 import { getSecret } from '../src/types.js'
 
@@ -62,7 +61,8 @@ describe('fromNsec', () => {
 })
 
 describe('fromMnemonic', () => {
-  const testMnemonic = generateMnemonic(wordlist, 128) // 12 words
+  const testMnemonic =
+    'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
 
   it('creates a TreeRoot from a valid mnemonic', () => {
     const root = fromMnemonic(testMnemonic)
