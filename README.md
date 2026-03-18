@@ -56,6 +56,15 @@ const proof = createBlindProof(root, child)
 const valid = verifyProof(proof) // true
 ```
 
+### Publish proof to Nostr (NIP-78)
+
+```typescript
+import { toUnsignedEvent } from 'nsec-tree/event'
+
+const unsigned = toUnsignedEvent(proof)
+// Sign with your Nostr library, then publish to relays
+```
+
 ---
 
 ## API
@@ -92,6 +101,14 @@ Like blind proof, but also reveals the purpose and index.
 
 Verify a `LinkageProof`. Returns `boolean`.
 
+### `toUnsignedEvent(proof)`
+
+Convert a `LinkageProof` to an unsigned NIP-78 Kind 30078 Nostr event. The application signs and publishes it.
+
+### `fromEvent(event)`
+
+Extract a `LinkageProof` from a NIP-78 event's tags. Pass the result to `verifyProof()` to check cryptographic validity.
+
 ---
 
 ## Subpath exports
@@ -103,6 +120,8 @@ Verify a `LinkageProof`. Returns `boolean`.
 | `nsec-tree/mnemonic` | fromMnemonic | Yes |
 | `nsec-tree/proof` | Linkage proofs | No |
 | `nsec-tree/persona` | Persona derivation, two-level hierarchy, recovery | No |
+| `nsec-tree/event` | NIP-78 event conversion (toUnsignedEvent, fromEvent) | No |
+| `nsec-tree/encoding` | NIP-19 bech32 helpers (encodeNsec, decodeNsec, encodeNpub, decodeNpub) | No |
 
 Use `nsec-tree/core` if you only need nsec-based derivation — it avoids pulling in BIP-32/39 dependencies.
 

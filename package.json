@@ -81,8 +81,13 @@
     "bip85",
     "derivation",
     "secp256k1",
-    "privacy"
+    "privacy",
+    "persona",
+    "nip-78",
+    "linkage-proof",
+    "sub-identity"
   ],
+  "homepage": "https://github.com/forgesworn/nsec-tree",
   "license": "MIT",
   "repository": {
     "type": "git",

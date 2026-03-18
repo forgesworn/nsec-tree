@@ -1,6 +1,6 @@
 # nsec-tree
 
-> Nostr developers managing multiple identities need deterministic key derivation, but NIP-06 only derives a single key from a mnemonic. nsec-tree derives unlimited unlinkable sub-identities from one master secret, with optional linkage proofs for selective disclosure.
+> Nostr developers managing multiple identities need deterministic key derivation, but NIP-06 only derives a single key from a mnemonic. nsec-tree derives unlimited unlinkable sub-identities from one master secret, with optional linkage proofs for selective disclosure and NIP-78 event publishing.
 
 nsec-tree is for Nostr application developers who need per-purpose or per-context identities — social, commerce, fleet management, throwaway — all recoverable from a single mnemonic or existing nsec. Unlike random key generation, every identity is deterministic and recoverable. Unlike BIP-32 public derivation, child identities are unlinkable by default.
 
@@ -28,23 +28,34 @@ root.destroy() // zero secret material
 - **TreeRoot** — opaque handle created from a mnemonic (`fromMnemonic`) or existing nsec (`fromNsec`). Holds the master secret. Call `destroy()` when done.
 - **Identity** — a derived child with `nsec`, `npub`, `privateKey`, `publicKey`, `purpose`, and `index`. Each is a fully independent secp256k1 keypair.
 - **Purpose string** — human-readable derivation tag (e.g. `"social"`, `"trott:rider"`, `"402:api:prod"`). Different purposes produce different, unlinkable keys.
+- **Persona** — a named identity derived using the convention `nostr:persona:{name}` (e.g. personal, bitcoiner, work). Supports two-level hierarchy: master → persona → group identity. Recoverable by scanning known persona names.
 - **Linkage proof** — BIP-340 Schnorr attestation that a master owns a child identity. Blind proofs hide the derivation slot; full proofs reveal it.
+- **NIP-78 events** — linkage proofs can be published to Nostr as Kind 30078 application-specific data, making key relationships discoverable on-protocol.
 - **Recovery** — scan known purpose strings to re-derive all identities from the master secret.
 
 ## API Surface
 
-| Function | Description |
-|----------|-------------|
-| `fromMnemonic(mnemonic, passphrase?)` | Create TreeRoot from BIP-39 mnemonic |
-| `fromNsec(nsec)` | Create TreeRoot from bech32 nsec or raw bytes |
-| `derive(root, purpose, index?)` | Derive a child Identity |
-| `recover(root, purposes, scanRange?)` | Scan purposes x indices for recovery |
-| `zeroise(identity)` | Zero the private key bytes |
-| `createBlindProof(root, child)` | Prove ownership without revealing derivation slot |
-| `createFullProof(root, child)` | Prove ownership with purpose and index |
-| `verifyProof(proof)` | Verify a LinkageProof |
+| Function | Subpath | Description |
+|----------|---------|-------------|
+| `fromMnemonic(mnemonic, passphrase?)` | `nsec-tree` | Create TreeRoot from BIP-39 mnemonic |
+| `fromNsec(nsec)` | `nsec-tree/core` | Create TreeRoot from bech32 nsec or raw bytes |
+| `derive(root, purpose, index?)` | `nsec-tree/core` | Derive a child Identity |
+| `recover(root, purposes, scanRange?)` | `nsec-tree/core` | Scan purposes x indices for recovery |
+| `zeroise(identity)` | `nsec-tree/core` | Zero the private key bytes |
+| `createBlindProof(root, child)` | `nsec-tree/proof` | Prove ownership without revealing derivation slot |
+| `createFullProof(root, child)` | `nsec-tree/proof` | Prove ownership with purpose and index |
+| `verifyProof(proof)` | `nsec-tree/proof` | Verify a LinkageProof |
+| `derivePersona(root, name, index?)` | `nsec-tree/persona` | Derive a named persona identity |
+| `deriveFromPersona(persona, purpose, index?)` | `nsec-tree/persona` | Derive sub-identity beneath a persona |
+| `recoverPersonas(root, names, scanRange?)` | `nsec-tree/persona` | Recover personas by scanning known names |
+| `toUnsignedEvent(proof)` | `nsec-tree/event` | Convert LinkageProof to unsigned NIP-78 Kind 30078 event |
+| `fromEvent(event)` | `nsec-tree/event` | Extract LinkageProof from a NIP-78 event |
+| `encodeNsec(bytes)` | `nsec-tree/encoding` | Encode raw bytes to bech32 nsec |
+| `decodeNsec(nsec)` | `nsec-tree/encoding` | Decode bech32 nsec to raw bytes |
+| `encodeNpub(bytes)` | `nsec-tree/encoding` | Encode raw bytes to bech32 npub |
+| `decodeNpub(npub)` | `nsec-tree/encoding` | Decode bech32 npub to raw bytes |
 
-Subpath exports for minimal dependencies: `nsec-tree/core` (no BIP-32/39), `nsec-tree/proof` (proofs only), `nsec-tree/mnemonic` (fromMnemonic only).
+Subpath exports for minimal dependencies: `nsec-tree/core` (no BIP-32/39), `nsec-tree/proof` (proofs only), `nsec-tree/mnemonic` (fromMnemonic only), `nsec-tree/persona` (persona hierarchy), `nsec-tree/event` (NIP-78 event conversion), `nsec-tree/encoding` (NIP-19 bech32 helpers).
 
 ## Optional
 
