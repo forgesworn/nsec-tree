@@ -78,6 +78,15 @@ export function fromEvent(event: { pubkey: string; tags: string[][] }): LinkageP
   if (!HEX_KEY_RE.test(childPubkey)) {
     throw new NsecTreeError(`Invalid childPubkey in d tag: expected 64-char lowercase hex`)
   }
+
+  const pValue = getTagValue(event.tags, 'p')
+  if (!pValue) {
+    throw new NsecTreeError('Missing p tag')
+  }
+  if (pValue !== childPubkey) {
+    throw new NsecTreeError('p tag does not match childPubkey in d tag')
+  }
+
   if (!HEX_KEY_RE.test(event.pubkey)) {
     throw new NsecTreeError(`Invalid pubkey: expected 64-char lowercase hex`)
   }

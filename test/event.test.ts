@@ -202,6 +202,21 @@ describe('fromEvent', () => {
       expect(() => fromEvent(event)).toThrow('childPubkey')
     })
 
+    it('throws on missing p tag', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      event.tags = event.tags.filter(t => t[0] !== 'p')
+      expect(() => fromEvent(event)).toThrow(NsecTreeError)
+    })
+
+    it('throws on p tag mismatching d tag childPubkey', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      const pTag = event.tags.find(t => t[0] === 'p')!
+      pTag[1] = 'bb'.repeat(32)
+      expect(() => fromEvent(event)).toThrow('p tag')
+    })
+
     it('throws on non-hex pubkey', () => {
       const proof = createFullProof(root, child)
       const event = toUnsignedEvent(proof)
