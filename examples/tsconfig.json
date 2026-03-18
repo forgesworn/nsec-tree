@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "nsec-tree": ["../src/index.ts"],
+      "nsec-tree/core": ["../src/core.ts"],
+      "nsec-tree/mnemonic": ["../src/mnemonic.ts"],
+      "nsec-tree/proof": ["../src/proof.ts"]
+    }
+  },
+  "include": ["./**/*.ts"]
+}
