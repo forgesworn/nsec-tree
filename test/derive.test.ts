@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { deriveChildKey } from '../src/derive.js'
+import { deriveChildKey, derive, zeroise } from '../src/derive.js'
+import { fromNsec } from '../src/root-nsec.js'
 
 describe('deriveChildKey', () => {
   const root = new Uint8Array(32).fill(1)
@@ -56,5 +57,39 @@ describe('deriveChildKey', () => {
   it('rejects invalid purpose strings', () => {
     expect(() => deriveChildKey(root, '')).toThrow()
     expect(() => deriveChildKey(root, 'bad\0purpose')).toThrow()
+  })
+})
+
+describe('derive (public API)', () => {
+  const testKey = new Uint8Array(32).fill(0xab)
+  const root = fromNsec(testKey)
+
+  it('returns a full Identity object', () => {
+    const id = derive(root, 'social')
+    expect(id.nsec).toBeDefined()
+    expect(id.nsec.startsWith('nsec1')).toBe(true)
+    expect(id.npub).toBeDefined()
+    expect(id.npub.startsWith('npub1')).toBe(true)
+    expect(id.privateKey.length).toBe(32)
+    expect(id.publicKey.length).toBe(32)
+    expect(id.purpose).toBe('social')
+    expect(id.index).toBe(0)
+  })
+
+  it('index defaults to 0', () => {
+    const a = derive(root, 'social')
+    const b = derive(root, 'social', 0)
+    expect(a.nsec).toBe(b.nsec)
+  })
+})
+
+describe('zeroise', () => {
+  it('fills privateKey with zeros', () => {
+    const root = fromNsec(new Uint8Array(32).fill(0xab))
+    const id = derive(root, 'test')
+    expect(id.privateKey.some(b => b !== 0)).toBe(true)
+    zeroise(id)
+    expect(id.privateKey.every(b => b === 0)).toBe(true)
+    root.destroy()
   })
 })

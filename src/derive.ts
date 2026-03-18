@@ -2,7 +2,10 @@ import { hmac } from '@noble/hashes/hmac.js'
 import { sha256 } from '@noble/hashes/sha2.js'
 import { schnorr } from '@noble/curves/secp256k1.js'
 import { NsecTreeError, MAX_INDEX } from './types.js'
+import type { Identity, TreeRoot } from './types.js'
+import { getSecret } from './types.js'
 import { validatePurpose } from './validate.js'
+import { encodeNsec, encodeNpub } from './encoding.js'
 
 const DOMAIN_PREFIX = new TextEncoder().encode('nsec-tree\0')
 const NULL_BYTE = new Uint8Array([0])
@@ -43,4 +46,22 @@ export function deriveChildKey(root: Uint8Array, purpose: string, index = 0): De
   }
 
   throw new NsecTreeError(`Index overflow: no valid key found at or after index ${index}`)
+}
+
+export function derive(root: TreeRoot, purpose: string, index = 0): Identity {
+  const secret = getSecret(root)
+  const { privateKey, publicKey, actualIndex } = deriveChildKey(secret, purpose, index)
+
+  return {
+    nsec: encodeNsec(privateKey),
+    npub: encodeNpub(publicKey),
+    privateKey,
+    publicKey,
+    purpose,
+    index: actualIndex,
+  }
+}
+
+export function zeroise(identity: Identity): void {
+  identity.privateKey.fill(0)
 }
