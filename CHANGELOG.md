@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/forgesworn/nsec-tree/compare/v1.3.2...v1.4.0) (2026-03-18)
+
+
+### Features
+
+* add deriveFromIdentity for arbitrary-depth key hierarchies ([a514968](https://github.com/forgesworn/nsec-tree/commit/a51496837083445b980db5bf045e38995e8425f9))
+
 ## [1.3.2](https://github.com/forgesworn/nsec-tree/compare/v1.3.1...v1.3.2) (2026-03-18)
 
 
