@@ -8,3 +8,4 @@ dist/
 *.key
 *.nsec
 coverage/
+docs/superpowers/
