@@ -1,3 +1,13 @@
+# [1.3.0](https://github.com/forgesworn/nsec-tree/compare/v1.2.0...v1.3.0) (2026-03-18)
+
+
+### Features
+
+* **event:** add event subpath export and re-export from index ([8d406c6](https://github.com/forgesworn/nsec-tree/commit/8d406c673cd183e9293cdc29af9c0f19660f715b))
+* **event:** implement fromEvent for parsing NIP-78 linkage proof events ([70b1928](https://github.com/forgesworn/nsec-tree/commit/70b1928f428c9273d133fc7b2f59b21f8e1cd591))
+* **event:** implement toUnsignedEvent for linkage proof publishing ([5a0591c](https://github.com/forgesworn/nsec-tree/commit/5a0591c5906385133f8117f7c49bae96d8ce381a))
+* **event:** scaffold event module with constants and UnsignedEvent type ([08a07a1](https://github.com/forgesworn/nsec-tree/commit/08a07a11c104a041a731f94aa1bb6fca5ef9419f))
+
 # [1.2.0](https://github.com/forgesworn/nsec-tree/compare/v1.1.0...v1.2.0) (2026-03-18)
 
 
