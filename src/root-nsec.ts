@@ -13,6 +13,7 @@ const registry = new FinalizationRegistry((secret: Uint8Array) => {
 
 export function createTreeRoot(secret: Uint8Array): TreeRoot {
   const ownedSecret = new Uint8Array(secret)
+  secret.fill(0)
   const publicKey = schnorr.getPublicKey(ownedSecret)
   const masterPubkey = encodeNpub(publicKey)
 
@@ -21,11 +22,12 @@ export function createTreeRoot(secret: Uint8Array): TreeRoot {
     destroy() {
       ownedSecret.fill(0)
       rootSecrets.delete(root)
+      registry.unregister(root)
     },
   }
 
   rootSecrets.set(root, ownedSecret)
-  registry.register(root, ownedSecret)
+  registry.register(root, ownedSecret, root)
   return root
 }
 
@@ -41,5 +43,7 @@ export function fromNsec(nsec: string | Uint8Array): TreeRoot {
 
   // Intermediate HMAC: tree_root = HMAC-SHA256(key=nsec, msg="nsec-tree-root")
   const treeRootSecret = hmac(sha256, keyBytes, NSEC_ROOT_LABEL)
-  return createTreeRoot(treeRootSecret)
+  const root = createTreeRoot(treeRootSecret)
+  treeRootSecret.fill(0)
+  return root
 }

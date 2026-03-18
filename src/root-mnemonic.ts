@@ -22,6 +22,10 @@ export function fromMnemonic(mnemonic: string, passphrase?: string): TreeRoot {
 
   const treeRootSecret = new Uint8Array(child.privateKey)
   seed.fill(0)
+  if (child.privateKey) child.privateKey.fill(0)
+  if (master.privateKey) master.privateKey.fill(0)
 
-  return createTreeRoot(treeRootSecret)
+  const root = createTreeRoot(treeRootSecret)
+  treeRootSecret.fill(0)
+  return root
 }

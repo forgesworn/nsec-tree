@@ -21,7 +21,7 @@ function decodeBech32(expectedPrefix: string, encoded: string): Uint8Array {
   try {
     result = bech32.decodeToBytes(encoded)
   } catch {
-    throw new NsecTreeError(`Invalid bech32 encoding: ${encoded}`)
+    throw new NsecTreeError('Invalid bech32 encoding')
   }
   if (result.prefix !== expectedPrefix) {
     throw new NsecTreeError(`Expected prefix "${expectedPrefix}", got "${result.prefix}"`)
