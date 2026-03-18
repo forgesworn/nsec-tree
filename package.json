@@ -25,6 +25,10 @@
     "./proof": {
       "types": "./dist/proof.d.ts",
       "import": "./dist/proof.js"
+    },
+    "./persona": {
+      "types": "./dist/persona-barrel.d.ts",
+      "import": "./dist/persona-barrel.js"
     }
   },
   "files": [

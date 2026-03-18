@@ -154,3 +154,13 @@ describe('recoverPersonas', () => {
     expect(Object.isFrozen(DEFAULT_PERSONA_NAMES)).toBe(true)
   })
 })
+
+describe('subpath export', () => {
+  it('exports from nsec-tree/persona', async () => {
+    const mod = await import('nsec-tree/persona')
+    expect(typeof mod.derivePersona).toBe('function')
+    expect(typeof mod.deriveFromPersona).toBe('function')
+    expect(typeof mod.recoverPersonas).toBe('function')
+    expect(Array.isArray(mod.DEFAULT_PERSONA_NAMES)).toBe(true)
+  })
+})
