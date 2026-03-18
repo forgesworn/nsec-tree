@@ -33,6 +33,10 @@
     "./encoding": {
       "types": "./dist/encoding-barrel.d.ts",
       "import": "./dist/encoding-barrel.js"
+    },
+    "./event": {
+      "types": "./dist/event-barrel.d.ts",
+      "import": "./dist/event-barrel.js"
     }
   },
   "files": [

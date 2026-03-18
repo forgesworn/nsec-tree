@@ -148,6 +148,16 @@ describe('fromEvent', () => {
   })
 })
 
+describe('event barrel exports', () => {
+  it('exports event functions and constants', async () => {
+    const mod = await import('../src/event-barrel.js')
+    expect(mod.toUnsignedEvent).toBeDefined()
+    expect(mod.fromEvent).toBeDefined()
+    expect(mod.NSEC_TREE_EVENT_KIND).toBeDefined()
+    expect(mod.NSEC_TREE_D_PREFIX).toBeDefined()
+  })
+})
+
 describe('nostr-tools integration', () => {
   it('produces a valid signed Nostr event when finalised with nostr-tools', () => {
     const root = fromNsec(new Uint8Array(32).fill(0xab))

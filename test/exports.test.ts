@@ -34,4 +34,12 @@ describe('subpath exports', () => {
     expect(mod.createFullProof).toBeDefined()
     expect(mod.verifyProof).toBeDefined()
   })
+
+  it('index exports event functions and constants', async () => {
+    const mod = await import('../src/index.js')
+    expect(mod.toUnsignedEvent).toBeDefined()
+    expect(mod.fromEvent).toBeDefined()
+    expect(mod.NSEC_TREE_EVENT_KIND).toBeDefined()
+    expect(mod.NSEC_TREE_D_PREFIX).toBeDefined()
+  })
 })
