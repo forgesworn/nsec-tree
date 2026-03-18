@@ -12,6 +12,14 @@ NIP-06 defines mnemonic-to-key derivation and allows incrementing the account in
 
 It removes it. Today, users who want separate identities manage N independent nsecs with N separate backups. nsec-tree: one mnemonic, unlimited identities, one backup. The complexity moves from the user (remembering which nsec goes where) to the library (deterministic derivation).
 
+### "Isn't this just personas or multiple accounts?"
+
+No. Personas are only the shallowest use-case. nsec-tree also supports
+arbitrary-depth hierarchies, so you can model paths like `work -> company:a ->
+payroll` and `work -> company:b -> ops` from the same master secret. That means
+one backup can deterministically recreate not just a handful of identities, but
+an entire operational key tree with isolated branches and separate blast radii.
+
 ### "Nobody needs multiple identities"
 
 Every user who has a shitposting alt already manages multiple identities manually with separate nsecs. Every bot operator manages keys in spreadsheets or environment variables. The need exists — the tooling doesn't. nsec-tree makes what people already do less error-prone and recoverable.

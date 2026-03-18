@@ -8,6 +8,7 @@ Different approaches exist for managing multiple Nostr identities. Each solves a
 |---------|--------|--------|--------------------------|-----------|
 | Multiple keys from one seed | Yes (account index) | No | No | Yes (purpose + index) |
 | Purpose-tagged | No | No | No | Yes |
+| Composable hierarchies | No | No | No | Yes |
 | Unlinkable by default | N/A (keys are independent) | No (delegation visible) | No (linking is the purpose) | Yes (cryptographic) |
 | Selective linkage | No mechanism | N/A | Yes (event tags) | Yes (Schnorr proofs) |
 | Recovery scanning | No standard | N/A | No | Yes |
@@ -29,4 +30,4 @@ The linked subkeys proposal defines a way to publicly associate existing indepen
 
 ## nsec-tree
 
-nsec-tree is a client-side key derivation library. From one master secret (an nsec or BIP-39 mnemonic), it derives unlimited child keypairs using HMAC-SHA256 with human-readable purpose tags. Child keys are ordinary Nostr keypairs — no relay changes, no client changes, no new event kinds required. Derived keys are unlinkable by default; an optional BIP-340 Schnorr proof mechanism allows the owner to selectively demonstrate that two keys share a root, without revealing the root itself. A standardised recovery scanning procedure means identities are not lost if the purpose strings are forgotten. nsec-tree is available on npm and works today with all existing Nostr infrastructure.
+nsec-tree is a client-side key derivation library. From one master secret (an nsec or BIP-39 mnemonic), it derives unlimited child keypairs using HMAC-SHA256 with human-readable purpose tags. Those children can themselves become subtree roots, so the model is not just "many accounts" but composable hierarchies such as `work -> company:a -> payroll` or `personal -> social -> alt`. Child keys are ordinary Nostr keypairs — no relay changes, no client changes, no new event kinds required. Derived keys are unlinkable by default; an optional BIP-340 Schnorr proof mechanism allows the owner to selectively demonstrate that two keys share a root, without revealing the root itself. A standardised recovery scanning procedure means identities are not lost if the purpose strings are forgotten. nsec-tree is available on npm and works today with all existing Nostr infrastructure.

@@ -1,4 +1,4 @@
-import { fromMnemonic } from 'nsec-tree'
+import { fromMnemonic, deriveFromIdentity } from 'nsec-tree'
 import {
   derivePersona,
   deriveFromPersona,
@@ -34,6 +34,16 @@ console.log('\nGroup identities (two-level hierarchy):\n')
 console.log(`  personal → family-2026:   ${family.npub}`)
 console.log(`  bitcoiner → local-meetup: ${meetup.npub}`)
 console.log(`  bitcoiner → btcpp-2026:   ${conference.npub}`)
+
+// 3b. Build deeper hierarchies from any derived identity
+const companyA = deriveFromIdentity(work.identity, 'company:a')
+const payroll = deriveFromIdentity(companyA, 'payroll')
+const companyB = deriveFromIdentity(work.identity, 'company:b')
+const ops = deriveFromIdentity(companyB, 'ops')
+
+console.log('\nDeep hierarchy (arbitrary depth):\n')
+console.log(`  work → company:a → payroll: ${payroll.npub}`)
+console.log(`  work → company:b → ops:     ${ops.npub}`)
 
 // 4. Blind linkage proof: prove meetup and conference share the same bitcoiner persona
 //    without revealing which persona or derivation slot

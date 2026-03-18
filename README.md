@@ -1,6 +1,6 @@
 # nsec-tree
 
-Deterministic Nostr sub-identity derivation. One master secret, unlimited identities.
+Deterministic Nostr identity hierarchies. One master secret, unlimited identities.
 
 ```
 npm install nsec-tree
@@ -16,9 +16,20 @@ primary key. nsec-tree gives you a purpose-tagged identity tree.
 - **Unlinkable by default** — no observer can prove two child npubs share a master
 - **Recoverable** — 12 words recreate your entire identity tree
 - **Purpose-tagged** — human-readable derivation (`"social"`, `"commerce"`, `"trott:rider"`)
+- **Composable hierarchies** — model trees like `work -> company:a -> signing`
 
 Children are ordinary Nostr keypairs. Clients that do not understand linkage
 proofs will treat them as separate identities.
+
+This is not just "multiple accounts from one seed". You can derive structured
+subtrees for personas, organisations, applications, environments, and rotated
+replacement keys:
+
+- `personal -> social -> main`
+- `personal -> social -> alt`
+- `work -> company:a -> payroll`
+- `work -> company:b -> ops`
+- `work -> company:b -> ops -> emergency`
 
 ---
 
@@ -45,6 +56,27 @@ import { fromNsec, derive } from 'nsec-tree/core' // no BIP deps
 const root = fromNsec('nsec1...')
 const throwaway = derive(root, 'throwaway', 42)
 ```
+
+### Build a hierarchy
+
+```typescript
+import { fromMnemonic, deriveFromIdentity } from 'nsec-tree'
+import { derivePersona } from 'nsec-tree/persona'
+
+const root = fromMnemonic('abandon abandon ... about')
+const work = derivePersona(root, 'work')
+const companyA = deriveFromIdentity(work.identity, 'company:a')
+const payroll = deriveFromIdentity(companyA, 'payroll')
+const companyB = deriveFromIdentity(work.identity, 'company:b')
+const ops = deriveFromIdentity(companyB, 'ops')
+
+console.log(work.identity.npub) // master -> work
+console.log(payroll.npub)       // master -> work -> company:a -> payroll
+console.log(ops.npub)           // master -> work -> company:b -> ops
+```
+
+Each level is deterministic and isolated. Compromising `company:a -> payroll`
+does not expose the sibling `company:b -> ops` branch.
 
 ### Prove ownership (linkage proofs)
 
@@ -80,6 +112,11 @@ Create a `TreeRoot` from a bech32 nsec string or raw 32-byte key. An intermediat
 ### `derive(root, purpose, index?)`
 
 Derive a child `Identity` from a `TreeRoot`. Returns `{ nsec, npub, privateKey, publicKey, purpose, index }`. The index defaults to `0`.
+
+### `deriveFromIdentity(identity, purpose, index?)`
+
+Derive a child `Identity` from any existing `Identity`, enabling arbitrary-depth
+hierarchies like `work -> company:a -> payroll -> hot-wallet`.
 
 ### `recover(root, purposes, scanRange?)`
 
@@ -132,6 +169,7 @@ Use `nsec-tree/core` if you only need nsec-based derivation — it avoids pullin
 - **Tree root** from mnemonic (BIP-32 at `m/44'/1237'/727'/0'/0'`) or nsec (intermediate HMAC)
 - **Child keys:** `HMAC-SHA256(tree_root, "nsec-tree\0" || purpose || "\0" || index_be32)`
 - **Linkage proofs:** BIP-340 Schnorr signatures over attestation strings
+- **Hierarchies:** any derived identity can itself become a subtree root via `deriveFromIdentity(...)`
 - See `PROTOCOL.md` for the full derivation spec with test vectors
 
 ---
@@ -174,6 +212,32 @@ The hierarchy is: **master → persona → group identity**. Compromising a grou
 key does not expose the persona key, and compromising a persona does not expose
 the master.
 
+### Arbitrary-depth hierarchy
+
+`deriveFromPersona(...)` is just a convenience helper. The more general
+`deriveFromIdentity(...)` API lets you keep branching as deep as you need.
+
+```typescript
+import { deriveFromIdentity } from 'nsec-tree'
+
+const companyA = deriveFromIdentity(work.identity, 'company:a')
+const payroll = deriveFromIdentity(companyA, 'payroll')
+const hotWallet = deriveFromIdentity(payroll, 'hot-wallet')
+
+const companyB = deriveFromIdentity(work.identity, 'company:b')
+const ops = deriveFromIdentity(companyB, 'ops')
+```
+
+That gives you paths like:
+
+- `master -> work -> company:a -> payroll -> hot-wallet`
+- `master -> work -> company:b -> ops`
+
+This is where nsec-tree becomes more than a "multi-account" library. It lets
+you model real operational structure directly in deterministic keys: people,
+teams, customers, devices, environments, or services. One backup recreates the
+entire tree.
+
 ### Recovery
 
 `recoverPersonas` re-derives all personas from a mnemonic by scanning a list of
@@ -193,6 +257,10 @@ for (const [name, personas] of recovered) {
 
 Recovery is deterministic — the same mnemonic always produces the same personas.
 You only need to know (or conventionalise) the persona names to scan.
+
+The same principle applies to deeper trees: recovery is easy when branch names
+and rotation conventions are stable. The more hierarchy you use, the more
+important naming discipline becomes.
 
 ### Rotation
 
@@ -250,7 +318,7 @@ Runnable examples in the [`examples/`](examples/) directory:
 | [linkage-proofs.ts](examples/linkage-proofs.ts) | Blind and full ownership proofs |
 | [bot-fleet.ts](examples/bot-fleet.ts) | 10 bots from one seed |
 | [nostr-event-signing.ts](examples/nostr-event-signing.ts) | Sign a kind-1 event with nostr-tools |
-| [persona.ts](examples/persona.ts) | Persona derivation, groups, rotation, recovery |
+| [persona.ts](examples/persona.ts) | Persona derivation, deep hierarchies, rotation, recovery |
 
 Run any example: `npx tsx examples/<name>.ts`
 
