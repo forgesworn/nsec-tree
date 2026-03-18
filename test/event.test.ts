@@ -145,6 +145,84 @@ describe('fromEvent', () => {
       event.tags = event.tags.filter(t => t[0] !== 'purpose')
       expect(() => fromEvent(event)).toThrow(NsecTreeError)
     })
+
+    it('throws on index exceeding uint32 max', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      const indexTag = event.tags.find(t => t[0] === 'index')!
+      indexTag[1] = '4294967296'
+      expect(() => fromEvent(event)).toThrow('exceeds maximum')
+    })
+
+    it('throws on index with trailing non-numeric characters', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      const indexTag = event.tags.find(t => t[0] === 'index')!
+      indexTag[1] = '42abc'
+      expect(() => fromEvent(event)).toThrow(NsecTreeError)
+    })
+
+    it('throws on index with leading zeros', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      const indexTag = event.tags.find(t => t[0] === 'index')!
+      indexTag[1] = '007'
+      expect(() => fromEvent(event)).toThrow(NsecTreeError)
+    })
+
+    it('throws on index with hex prefix', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      const indexTag = event.tags.find(t => t[0] === 'index')!
+      indexTag[1] = '0x1F'
+      expect(() => fromEvent(event)).toThrow(NsecTreeError)
+    })
+
+    it('throws on index with decimal point', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      const indexTag = event.tags.find(t => t[0] === 'index')!
+      indexTag[1] = '3.14'
+      expect(() => fromEvent(event)).toThrow(NsecTreeError)
+    })
+
+    it('throws on non-hex childPubkey in d tag', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      const dTag = event.tags.find(t => t[0] === 'd')!
+      dTag[1] = 'nsec-tree:not-valid-hex'
+      expect(() => fromEvent(event)).toThrow('childPubkey')
+    })
+
+    it('throws on uppercase hex childPubkey in d tag', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      const dTag = event.tags.find(t => t[0] === 'd')!
+      dTag[1] = 'nsec-tree:' + 'AA'.repeat(32)
+      expect(() => fromEvent(event)).toThrow('childPubkey')
+    })
+
+    it('throws on non-hex pubkey', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      expect(() => fromEvent({ pubkey: 'not-hex', tags: event.tags })).toThrow('pubkey')
+    })
+
+    it('throws on non-hex proof-sig', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      const sigTag = event.tags.find(t => t[0] === 'proof-sig')!
+      sigTag[1] = 'ZZ'.repeat(64)
+      expect(() => fromEvent(event)).toThrow('proof-sig')
+    })
+
+    it('throws on short proof-sig', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      const sigTag = event.tags.find(t => t[0] === 'proof-sig')!
+      sigTag[1] = 'aa'.repeat(32)
+      expect(() => fromEvent(event)).toThrow('proof-sig')
+    })
   })
 })
 

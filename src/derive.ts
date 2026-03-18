@@ -65,6 +65,13 @@ export function derive(root: TreeRoot, purpose: string, index = 0): Identity {
   }
 }
 
+/**
+ * Zero the raw private key bytes of a derived identity.
+ *
+ * **Limitation:** the `nsec` bech32 string is an immutable JS string and
+ * cannot be overwritten. Callers must avoid persisting `identity.nsec`
+ * after zeroisation and should rely on `privateKey` for signing operations.
+ */
 export function zeroise(identity: Identity): void {
   identity.privateKey.fill(0)
 }

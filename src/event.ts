@@ -1,5 +1,9 @@
 import type { LinkageProof } from './types.js'
-import { NsecTreeError } from './types.js'
+import { NsecTreeError, MAX_INDEX } from './types.js'
+
+const HEX_KEY_RE = /^[0-9a-f]{64}$/
+const HEX_SIGNATURE_RE = /^[0-9a-f]{128}$/
+const STRICT_UINT_RE = /^(?:0|[1-9]\d*)$/
 
 function getTagValue(tags: string[][], name: string): string | undefined {
   const tag = tags.find(t => t[0] === name)
@@ -71,6 +75,16 @@ export function fromEvent(event: { pubkey: string; tags: string[][] }): LinkageP
   }
 
   const childPubkey = dValue.slice(NSEC_TREE_D_PREFIX.length)
+  if (!HEX_KEY_RE.test(childPubkey)) {
+    throw new NsecTreeError(`Invalid childPubkey in d tag: expected 64-char lowercase hex`)
+  }
+  if (!HEX_KEY_RE.test(event.pubkey)) {
+    throw new NsecTreeError(`Invalid pubkey: expected 64-char lowercase hex`)
+  }
+  if (!HEX_SIGNATURE_RE.test(signature)) {
+    throw new NsecTreeError(`Invalid proof-sig: expected 128-char lowercase hex`)
+  }
+
   const purposeValue = getTagValue(event.tags, 'purpose')
   const indexValue = getTagValue(event.tags, 'index')
 
@@ -88,9 +102,12 @@ export function fromEvent(event: { pubkey: string; tags: string[][] }): LinkageP
   }
 
   if (hasIndex) {
-    index = parseInt(indexValue!, 10)
-    if (!Number.isInteger(index) || index < 0) {
+    if (!STRICT_UINT_RE.test(indexValue!)) {
       throw new NsecTreeError(`Invalid index tag: ${indexValue}`)
+    }
+    index = Number(indexValue)
+    if (index > MAX_INDEX) {
+      throw new NsecTreeError(`Index exceeds maximum (${MAX_INDEX}): ${indexValue}`)
     }
   }
 
