@@ -1,7 +1,5 @@
 export { fromNsec } from './root-nsec.js'
-export { fromMnemonic } from './root-mnemonic.js'
 export { derive, zeroise } from './derive.js'
 export { recover } from './recover.js'
-export { createBlindProof, createFullProof, verifyProof } from './proof.js'
-export type { TreeRoot, Identity, LinkageProof } from './types.js'
+export type { TreeRoot, Identity } from './types.js'
 export { NsecTreeError, DEFAULT_SCAN_RANGE, MAX_INDEX } from './types.js'
