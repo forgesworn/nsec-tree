@@ -1,3 +1,18 @@
+# [1.1.0](https://github.com/forgesworn/nsec-tree/compare/v1.0.0...v1.1.0) (2026-03-18)
+
+
+### Bug Fixes
+
+* use source barrel import in persona subpath test (CI has no dist/) ([7283d07](https://github.com/forgesworn/nsec-tree/commit/7283d0718ff01b8b169a001e05fcbc080a7bac82))
+
+
+### Features
+
+* add deriveFromPersona two-level hierarchy ([033c67e](https://github.com/forgesworn/nsec-tree/commit/033c67edcd141d375ca2f9ee7ecda47bb8df4f87))
+* add derivePersona core function ([33d112f](https://github.com/forgesworn/nsec-tree/commit/33d112f688c83b78381887c31be42eb1e1b6e2ca))
+* add nsec-tree/persona subpath export ([6681f9d](https://github.com/forgesworn/nsec-tree/commit/6681f9d84c10745491e2ee5bd209be95ca46a07e))
+* add recoverPersonas with default persona names ([2e2bf2d](https://github.com/forgesworn/nsec-tree/commit/2e2bf2dc4c4e00ca539750b4339e5fb086d166be))
+
 # 1.0.0 (2026-03-18)
 
 
