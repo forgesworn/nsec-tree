@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/forgesworn/nsec-tree/compare/v1.3.0...v1.3.1) (2026-03-18)
+
+
+### Bug Fixes
+
+* **event:** harden fromEvent input validation against malformed events ([c9d96a8](https://github.com/forgesworn/nsec-tree/commit/c9d96a8767bed86c8632d2817abff697e7962543))
+
 # [1.3.0](https://github.com/forgesworn/nsec-tree/compare/v1.2.0...v1.3.0) (2026-03-18)
 
 
