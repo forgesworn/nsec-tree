@@ -31,8 +31,17 @@ describe('encoding', () => {
     expect(() => decodeNpub(nsec)).toThrow()
   })
 
-  it('rejects invalid length', () => {
+  it('rejects invalid length on encode', () => {
     expect(() => encodeNsec(new Uint8Array(16))).toThrow()
+  })
+
+  it('rejects non-32-byte payload on decode', async () => {
+    // Encode a 20-byte payload with nsec prefix to craft an invalid-length nsec string
+    const { bech32 } = await import('@scure/base')
+    const shortPayload = new Uint8Array(20)
+    const words = bech32.toWords(shortPayload)
+    const crafted = bech32.encode('nsec' as `${string}1${string}`, words, 1500) as string
+    expect(() => decodeNsec(crafted)).toThrow('32-byte')
   })
 
   it('bytesToHex produces lowercase hex', () => {
