@@ -11,6 +11,7 @@ describe('subpath exports', () => {
     expect(mod.createBlindProof).toBeDefined()
     expect(mod.createFullProof).toBeDefined()
     expect(mod.verifyProof).toBeDefined()
+    expect(mod.deriveFromIdentity).toBeDefined()
   })
 
   it('core exports no mnemonic or proof functions', async () => {
