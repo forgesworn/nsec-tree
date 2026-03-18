@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { NSEC_TREE_EVENT_KIND, NSEC_TREE_D_PREFIX, toUnsignedEvent } from '../src/event.js'
+import { NSEC_TREE_EVENT_KIND, NSEC_TREE_D_PREFIX, toUnsignedEvent, fromEvent } from '../src/event.js'
 import { fromNsec } from '../src/root-nsec.js'
 import { derive } from '../src/derive.js'
-import { createFullProof, createBlindProof } from '../src/proof.js'
+import { createFullProof, createBlindProof, verifyProof } from '../src/proof.js'
+import { NsecTreeError } from '../src/types.js'
 
 describe('event constants', () => {
   it('exports NIP-78 kind', () => {
@@ -60,5 +61,88 @@ describe('toUnsignedEvent', () => {
 
     // d, p, attestation, proof-sig still present
     expect(event.tags).toHaveLength(4)
+  })
+})
+
+describe('fromEvent', () => {
+  const root = fromNsec(new Uint8Array(32).fill(0xab))
+  const child = derive(root, 'social', 0)
+
+  describe('round-trip', () => {
+    it('full proof survives toUnsignedEvent → fromEvent → verifyProof', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      const restored = fromEvent(event)
+      expect(verifyProof(restored)).toBe(true)
+    })
+
+    it('blind proof survives toUnsignedEvent → fromEvent → verifyProof', () => {
+      const proof = createBlindProof(root, child)
+      const event = toUnsignedEvent(proof)
+      const restored = fromEvent(event)
+      expect(verifyProof(restored)).toBe(true)
+      expect(restored.purpose).toBeUndefined()
+      expect(restored.index).toBeUndefined()
+    })
+  })
+
+  describe('validation', () => {
+    it('throws on missing d tag', () => {
+      expect(() => fromEvent({
+        pubkey: 'aa'.repeat(32),
+        tags: [['p', 'bb'.repeat(32)]],
+      })).toThrow(NsecTreeError)
+    })
+
+    it('throws on d tag with wrong prefix', () => {
+      expect(() => fromEvent({
+        pubkey: 'aa'.repeat(32),
+        tags: [['d', 'wrong:prefix']],
+      })).toThrow(NsecTreeError)
+    })
+
+    it('throws on missing attestation tag', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      event.tags = event.tags.filter(t => t[0] !== 'attestation')
+      expect(() => fromEvent(event)).toThrow(NsecTreeError)
+    })
+
+    it('throws on missing proof-sig tag', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      event.tags = event.tags.filter(t => t[0] !== 'proof-sig')
+      expect(() => fromEvent(event)).toThrow(NsecTreeError)
+    })
+
+    it('throws on non-numeric index', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      const indexTag = event.tags.find(t => t[0] === 'index')!
+      indexTag[1] = 'not-a-number'
+      expect(() => fromEvent(event)).toThrow(NsecTreeError)
+    })
+
+    it('throws on negative index', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      const indexTag = event.tags.find(t => t[0] === 'index')!
+      indexTag[1] = '-1'
+      expect(() => fromEvent(event)).toThrow(NsecTreeError)
+    })
+
+    it('throws when purpose present without index', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      event.tags = event.tags.filter(t => t[0] !== 'index')
+      expect(() => fromEvent(event)).toThrow(NsecTreeError)
+    })
+
+    it('throws when index present without purpose', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      event.tags = event.tags.filter(t => t[0] !== 'purpose')
+      expect(() => fromEvent(event)).toThrow(NsecTreeError)
+    })
   })
 })
