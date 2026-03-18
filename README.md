@@ -116,6 +116,30 @@ Use `nsec-tree/core` if you only need nsec-based derivation — it avoids pullin
 
 ---
 
+## Examples
+
+Runnable examples in the [`examples/`](examples/) directory:
+
+| Example | What it shows |
+|---------|---------------|
+| [basic-derivation.ts](examples/basic-derivation.ts) | Derive social + commerce identities |
+| [existing-nsec.ts](examples/existing-nsec.ts) | Use an existing nsec, no mnemonic needed |
+| [recovery.ts](examples/recovery.ts) | Recover all identities from a mnemonic |
+| [linkage-proofs.ts](examples/linkage-proofs.ts) | Blind and full ownership proofs |
+| [bot-fleet.ts](examples/bot-fleet.ts) | 10 bots from one seed |
+| [nostr-event-signing.ts](examples/nostr-event-signing.ts) | Sign a kind-1 event with nostr-tools |
+
+Run any example: `npx tsx examples/<name>.ts`
+
+## Further reading
+
+- [FAQ](docs/faq.md) — common questions and objections
+- [Comparison](docs/comparison.md) — nsec-tree vs NIP-06, NIP-26, linked subkeys
+- [NIP draft](docs/NIP-XXXX.md) — formal specification in NIP format
+- [PROTOCOL.md](PROTOCOL.md) — full derivation spec with test vectors
+
+---
+
 ## Security
 
 - **Zero custom crypto** — HMAC-SHA256 (RFC 2104), BIP-32, BIP-340 Schnorr. All from @noble/@scure.
