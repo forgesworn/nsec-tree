@@ -2,10 +2,11 @@ import { describe, it, expect } from 'vitest'
 import { schnorr } from '@noble/curves/secp256k1.js'
 import { fromNsec } from '../src/root-nsec.js'
 import { fromMnemonic } from '../src/root-mnemonic.js'
+import { derive } from '../src/derive.js'
 import { HDKey } from '@scure/bip32'
 import { mnemonicToSeedSync } from '@scure/bip39'
 import { encodeNsec, decodeNpub } from '../src/encoding.js'
-import { getSecret } from '../src/types.js'
+import { getSecret, rootSecrets } from '../src/types.js'
 
 describe('fromNsec', () => {
   const testKey = new Uint8Array(32).fill(0xab)
@@ -55,6 +56,20 @@ describe('fromNsec', () => {
     expect(() => getSecret(root)).toThrow('destroyed')
   })
 
+  it('destroy actually zeroes the buffer bytes', () => {
+    const root = fromNsec(testKey)
+    const secretRef = rootSecrets.get(root)!
+    expect(secretRef.some(b => b !== 0)).toBe(true)
+    root.destroy()
+    expect(secretRef.every(b => b === 0)).toBe(true)
+  })
+
+  it('derive rejects destroyed root', () => {
+    const root = fromNsec(testKey)
+    root.destroy()
+    expect(() => derive(root, 'social')).toThrow('destroyed')
+  })
+
   it('rejects invalid input', () => {
     expect(() => fromNsec(new Uint8Array(16))).toThrow()
   })
@@ -98,5 +113,9 @@ describe('fromMnemonic', () => {
 
   it('rejects invalid mnemonic', () => {
     expect(() => fromMnemonic('not a valid mnemonic at all')).toThrow()
+  })
+
+  it('rejects non-string passphrase', () => {
+    expect(() => fromMnemonic(testMnemonic, 42 as unknown as string)).toThrow('passphrase must be a string')
   })
 })

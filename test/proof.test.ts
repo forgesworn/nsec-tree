@@ -70,5 +70,19 @@ describe('linkage proofs', () => {
       const tampered = { ...proof, purpose: 'commerce' }
       expect(verifyProof(tampered)).toBe(false)
     })
+
+    it('rejects proof signed by a different root', () => {
+      const otherRoot = fromNsec(new Uint8Array(32).fill(0xcd))
+      const otherChild = derive(otherRoot, 'social', 0)
+      const otherProof = createBlindProof(otherRoot, otherChild)
+      // Swap masterPubkey to claim it came from the first root
+      const tampered = { ...otherProof, masterPubkey: createBlindProof(root, child).masterPubkey }
+      expect(verifyProof(tampered)).toBe(false)
+    })
+
+    it('returns false for null or undefined input', () => {
+      expect(verifyProof(null as unknown as Parameters<typeof verifyProof>[0])).toBe(false)
+      expect(verifyProof(undefined as unknown as Parameters<typeof verifyProof>[0])).toBe(false)
+    })
   })
 })

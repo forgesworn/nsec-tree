@@ -43,6 +43,7 @@ export function fromNsec(nsec: string | Uint8Array): TreeRoot {
 
   // Intermediate HMAC: tree_root = HMAC-SHA256(key=nsec, msg="nsec-tree-root")
   const treeRootSecret = hmac(sha256, keyBytes, NSEC_ROOT_LABEL)
+  if (typeof nsec === 'string') keyBytes.fill(0)
   const root = createTreeRoot(treeRootSecret)
   treeRootSecret.fill(0)
   return root

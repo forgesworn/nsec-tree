@@ -32,14 +32,22 @@ describe('recover', () => {
   })
 
   it('rejects zero scanRange', () => {
-    expect(() => recover(root, ['social'], 0)).toThrow('positive integer')
+    expect(() => recover(root, ['social'], 0)).toThrow('scanRange')
   })
 
   it('rejects negative scanRange', () => {
-    expect(() => recover(root, ['social'], -1)).toThrow('positive integer')
+    expect(() => recover(root, ['social'], -1)).toThrow('scanRange')
   })
 
   it('rejects NaN scanRange', () => {
-    expect(() => recover(root, ['social'], NaN)).toThrow('positive integer')
+    expect(() => recover(root, ['social'], NaN)).toThrow()
+  })
+
+  it('rejects scanRange exceeding MAX_SCAN_RANGE', () => {
+    expect(() => recover(root, ['social'], 10_001)).toThrow()
+  })
+
+  it('rejects non-array purposes', () => {
+    expect(() => recover(root, 'social' as unknown as string[])).toThrow('array')
   })
 })

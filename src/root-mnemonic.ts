@@ -8,6 +8,12 @@ import { createTreeRoot } from './root-nsec.js'
 const DERIVATION_PATH = "m/44'/1237'/727'/0'/0'"
 
 export function fromMnemonic(mnemonic: string, passphrase?: string): TreeRoot {
+  if (typeof mnemonic !== 'string') {
+    throw new NsecTreeError('mnemonic must be a string')
+  }
+  if (passphrase !== undefined && typeof passphrase !== 'string') {
+    throw new NsecTreeError('passphrase must be a string')
+  }
   if (!validateMnemonic(mnemonic, wordlist)) {
     throw new NsecTreeError('Invalid BIP-39 mnemonic')
   }

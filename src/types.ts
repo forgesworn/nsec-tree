@@ -65,3 +65,6 @@ export const MAX_INDEX = 0xFFFFFFFF
 
 /** Default scan range for recovery (BIP-44 gap limit). */
 export const DEFAULT_SCAN_RANGE = 20
+
+/** Maximum scan range for recovery (prevents self-DoS). */
+export const MAX_SCAN_RANGE = 10_000

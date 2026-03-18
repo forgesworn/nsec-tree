@@ -26,6 +26,9 @@ function decodeBech32(expectedPrefix: string, encoded: string): Uint8Array {
   if (result.prefix !== expectedPrefix) {
     throw new NsecTreeError(`Expected prefix "${expectedPrefix}", got "${result.prefix}"`)
   }
+  if (result.bytes.length !== 32) {
+    throw new NsecTreeError(`Expected 32-byte payload, got ${result.bytes.length}`)
+  }
   return result.bytes
 }
 

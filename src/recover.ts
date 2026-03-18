@@ -1,5 +1,5 @@
 import type { Identity, TreeRoot } from './types.js'
-import { DEFAULT_SCAN_RANGE, NsecTreeError } from './types.js'
+import { DEFAULT_SCAN_RANGE, MAX_SCAN_RANGE, NsecTreeError } from './types.js'
 import { derive } from './derive.js'
 
 export function recover(
@@ -7,8 +7,11 @@ export function recover(
   purposes: string[],
   scanRange = DEFAULT_SCAN_RANGE,
 ): Map<string, Identity[]> {
-  if (!Number.isInteger(scanRange) || scanRange < 1) {
-    throw new NsecTreeError(`scanRange must be a positive integer, got ${scanRange}`)
+  if (!Array.isArray(purposes)) {
+    throw new NsecTreeError('purposes must be an array of strings')
+  }
+  if (!Number.isInteger(scanRange) || scanRange < 1 || scanRange > MAX_SCAN_RANGE) {
+    throw new NsecTreeError(`scanRange must be an integer in [1, ${MAX_SCAN_RANGE}], got ${scanRange}`)
   }
   const result = new Map<string, Identity[]>()
 
