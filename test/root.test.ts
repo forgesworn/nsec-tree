@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest'
 import { schnorr } from '@noble/curves/secp256k1.js'
 import { fromNsec } from '../src/root-nsec.js'
+import { fromMnemonic } from '../src/root-mnemonic.js'
+import { HDKey } from '@scure/bip32'
+import { mnemonicToSeedSync, generateMnemonic } from '@scure/bip39'
+import { wordlist } from '@scure/bip39/wordlists/english.js'
 import { encodeNsec, decodeNpub } from '../src/encoding.js'
 import { getSecret } from '../src/types.js'
 
@@ -54,5 +58,45 @@ describe('fromNsec', () => {
 
   it('rejects invalid input', () => {
     expect(() => fromNsec(new Uint8Array(16))).toThrow()
+  })
+})
+
+describe('fromMnemonic', () => {
+  const testMnemonic = generateMnemonic(wordlist, 128) // 12 words
+
+  it('creates a TreeRoot from a valid mnemonic', () => {
+    const root = fromMnemonic(testMnemonic)
+    expect(root.masterPubkey.startsWith('npub1')).toBe(true)
+    root.destroy()
+  })
+
+  it('same mnemonic produces same masterPubkey', () => {
+    const a = fromMnemonic(testMnemonic)
+    const b = fromMnemonic(testMnemonic)
+    expect(a.masterPubkey).toBe(b.masterPubkey)
+    a.destroy()
+    b.destroy()
+  })
+
+  it('different passphrase produces different tree', () => {
+    const a = fromMnemonic(testMnemonic)
+    const b = fromMnemonic(testMnemonic, 'mypassphrase')
+    expect(a.masterPubkey).not.toBe(b.masterPubkey)
+    a.destroy()
+    b.destroy()
+  })
+
+  it('mnemonic path differs from nsec path for same underlying key', () => {
+    const mnemonicRoot = fromMnemonic(testMnemonic)
+    const seed = mnemonicToSeedSync(testMnemonic)
+    const nip06Key = HDKey.fromMasterSeed(seed).derive("m/44'/1237'/0'/0/0")
+    const nsecRoot = fromNsec(nip06Key.privateKey!)
+    expect(mnemonicRoot.masterPubkey).not.toBe(nsecRoot.masterPubkey)
+    mnemonicRoot.destroy()
+    nsecRoot.destroy()
+  })
+
+  it('rejects invalid mnemonic', () => {
+    expect(() => fromMnemonic('not a valid mnemonic at all')).toThrow()
   })
 })
