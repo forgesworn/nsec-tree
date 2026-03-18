@@ -15,3 +15,31 @@ export interface UnsignedEvent {
   tags: string[][]
   content: string
 }
+
+/**
+ * Convert a LinkageProof to an unsigned NIP-78 (Kind 30078) Nostr event.
+ * The application signs and publishes this with their own Nostr library.
+ * Does not validate the proof — the caller is responsible for passing a valid LinkageProof.
+ */
+export function toUnsignedEvent(proof: LinkageProof): UnsignedEvent {
+  const tags: string[][] = [
+    ['d', `${NSEC_TREE_D_PREFIX}${proof.childPubkey}`],
+    ['p', proof.childPubkey],
+  ]
+
+  if (proof.purpose !== undefined && proof.index !== undefined) {
+    tags.push(['purpose', proof.purpose])
+    tags.push(['index', String(proof.index)])
+  }
+
+  tags.push(['attestation', proof.attestation])
+  tags.push(['proof-sig', proof.signature])
+
+  return {
+    kind: NSEC_TREE_EVENT_KIND,
+    pubkey: proof.masterPubkey,
+    created_at: Math.floor(Date.now() / 1000),
+    tags,
+    content: '',
+  }
+}
