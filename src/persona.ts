@@ -1,6 +1,12 @@
 import type { Identity, TreeRoot } from './types.js'
+import { NsecTreeError, MAX_SCAN_RANGE } from './types.js'
 import { derive } from './derive.js'
 import { fromNsec } from './root-nsec.js'
+
+/** Default persona names scanned during recovery. */
+export const DEFAULT_PERSONA_NAMES = Object.freeze(
+  ['personal', 'bitcoiner', 'work', 'social', 'anonymous'] as const,
+)
 
 /** A named persona derived from a TreeRoot. */
 export interface Persona {
@@ -43,4 +49,32 @@ export function deriveFromPersona(persona: Persona, purpose: string, index = 0):
   } finally {
     intermediateRoot.destroy()
   }
+}
+
+/**
+ * Recover personas by scanning known names at multiple indices.
+ *
+ * When no names are provided, scans {@link DEFAULT_PERSONA_NAMES}.
+ * Default scanRange is 1 (index 0 only).
+ */
+export function recoverPersonas(
+  root: TreeRoot,
+  names: readonly string[] = DEFAULT_PERSONA_NAMES,
+  scanRange = 1,
+): Map<string, Persona[]> {
+  if (!Number.isInteger(scanRange) || scanRange < 1 || scanRange > MAX_SCAN_RANGE) {
+    throw new NsecTreeError(`scanRange must be an integer in [1, ${MAX_SCAN_RANGE}], got ${scanRange}`)
+  }
+
+  const result = new Map<string, Persona[]>()
+
+  for (const name of names) {
+    const personas: Persona[] = []
+    for (let i = 0; i < scanRange; i++) {
+      personas.push(derivePersona(root, name, i))
+    }
+    result.set(name, personas)
+  }
+
+  return result
 }

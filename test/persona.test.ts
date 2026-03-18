@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { fromNsec } from '../src/root-nsec.js'
 import { derive } from '../src/derive.js'
-import { derivePersona, deriveFromPersona } from '../src/persona.js'
+import { derivePersona, deriveFromPersona, recoverPersonas, DEFAULT_PERSONA_NAMES } from '../src/persona.js'
 
 describe('derivePersona', () => {
   const root = fromNsec(new Uint8Array(32).fill(0xab))
@@ -104,5 +104,53 @@ describe('deriveFromPersona', () => {
     const sub2 = deriveFromPersona(persona, 'group:cleanup2')
     expect(sub1.nsec).toBeDefined()
     expect(sub2.nsec).toBeDefined()
+  })
+})
+
+describe('recoverPersonas', () => {
+  const root = fromNsec(new Uint8Array(32).fill(0xab))
+
+  it('recovers personas by name', () => {
+    const result = recoverPersonas(root, ['personal', 'work'])
+    expect(result.size).toBe(2)
+    expect(result.has('personal')).toBe(true)
+    expect(result.has('work')).toBe(true)
+    expect(result.get('personal')!.length).toBe(1)
+    expect(result.get('work')!.length).toBe(1)
+  })
+
+  it('recovered persona matches directly derived persona', () => {
+    const result = recoverPersonas(root, ['personal'])
+    const recovered = result.get('personal')![0]!
+    const direct = derivePersona(root, 'personal', 0)
+    expect(recovered.identity.nsec).toBe(direct.identity.nsec)
+    expect(recovered.identity.npub).toBe(direct.identity.npub)
+    expect(recovered.name).toBe(direct.name)
+    expect(recovered.index).toBe(direct.index)
+  })
+
+  it('scans multiple indices for rotated personas', () => {
+    const result = recoverPersonas(root, ['personal'], 3)
+    const personas = result.get('personal')!
+    expect(personas.length).toBe(3)
+    for (let i = 0; i < 3; i++) {
+      const direct = derivePersona(root, 'personal', i)
+      expect(personas[i]!.identity.nsec).toBe(direct.identity.nsec)
+      expect(personas[i]!.index).toBe(i)
+    }
+  })
+
+  it('scans DEFAULT_PERSONA_NAMES when no names provided', () => {
+    const result = recoverPersonas(root)
+    expect(result.size).toBe(DEFAULT_PERSONA_NAMES.length)
+    for (const name of DEFAULT_PERSONA_NAMES) {
+      expect(result.has(name)).toBe(true)
+      expect(result.get(name)!.length).toBe(1) // default scanRange = 1
+    }
+  })
+
+  it('exports DEFAULT_PERSONA_NAMES as a readonly tuple', () => {
+    expect(DEFAULT_PERSONA_NAMES).toEqual(['personal', 'bitcoiner', 'work', 'social', 'anonymous'])
+    expect(Object.isFrozen(DEFAULT_PERSONA_NAMES)).toBe(true)
   })
 })
