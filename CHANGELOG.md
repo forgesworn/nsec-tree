@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/forgesworn/nsec-tree/compare/v1.4.0...v1.4.1) (2026-03-20)
+
+
+### Bug Fixes
+
+* correct copyright to TheCryptoDonkey ([6adacd3](https://github.com/forgesworn/nsec-tree/commit/6adacd3092d77997c193ecb5317ea3e03a9e7469))
+
 # [1.4.0](https://github.com/forgesworn/nsec-tree/compare/v1.3.2...v1.4.0) (2026-03-18)
 
 
