@@ -92,5 +92,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/forgesworn/nsec-tree.git"
+  },
+  "funding": {
+    "type": "lightning",
+    "url": "lightning:thedonkey@strike.me"
   }
 }
