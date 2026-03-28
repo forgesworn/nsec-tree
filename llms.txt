@@ -28,7 +28,7 @@ root.destroy() // zero secret material
 - **TreeRoot** — opaque handle created from a mnemonic (`fromMnemonic`) or existing nsec (`fromNsec`). Holds the master secret. Call `destroy()` when done.
 - **Identity** — a derived child with `nsec`, `npub`, `privateKey`, `publicKey`, `purpose`, and `index`. Each is a fully independent secp256k1 keypair.
 - **Purpose string** — human-readable derivation tag (e.g. `"social"`, `"trott:rider"`, `"402:api:prod"`). Different purposes produce different, unlinkable keys.
-- **Persona** — a named identity derived using the convention `nostr:persona:{name}` (e.g. personal, bitcoiner, work). Supports two-level hierarchy: master → persona → group identity. Recoverable by scanning known persona names.
+- **Persona** — a named identity derived using the convention `nostr:persona:{name}` (e.g. personal, bitcoiner, work). Supports two-level hierarchy: master -> persona -> group identity. Recoverable by scanning known persona names.
 - **Linkage proof** — BIP-340 Schnorr attestation that a master owns a child identity. Blind proofs hide the derivation slot; full proofs reveal it.
 - **NIP-78 events** — linkage proofs can be published to Nostr as Kind 30078 application-specific data, making key relationships discoverable on-protocol.
 - **Recovery** — scan known purpose strings to re-derive all identities from the master secret.
@@ -40,6 +40,7 @@ root.destroy() // zero secret material
 | `fromMnemonic(mnemonic, passphrase?)` | `nsec-tree` | Create TreeRoot from BIP-39 mnemonic |
 | `fromNsec(nsec)` | `nsec-tree/core` | Create TreeRoot from bech32 nsec or raw bytes |
 | `derive(root, purpose, index?)` | `nsec-tree/core` | Derive a child Identity |
+| `deriveFromIdentity(identity, purpose, index?)` | `nsec-tree` | Derive child from any Identity (arbitrary-depth hierarchies) |
 | `recover(root, purposes, scanRange?)` | `nsec-tree/core` | Scan purposes x indices for recovery |
 | `zeroise(identity)` | `nsec-tree/core` | Zero the private key bytes |
 | `createBlindProof(root, child)` | `nsec-tree/proof` | Prove ownership without revealing derivation slot |
@@ -60,4 +61,5 @@ Subpath exports for minimal dependencies: `nsec-tree/core` (no BIP-32/39), `nsec
 ## Optional
 
 - [PROTOCOL.md](https://github.com/forgesworn/nsec-tree/blob/main/PROTOCOL.md): Full derivation specification with byte-level format and frozen test vectors
+- [llms-full.txt](https://github.com/forgesworn/nsec-tree/blob/main/llms-full.txt): Comprehensive reference with all types, constants, derivation protocol details, and security model
 - [README.md](https://github.com/forgesworn/nsec-tree/blob/main/README.md): Quick start, API reference, security model

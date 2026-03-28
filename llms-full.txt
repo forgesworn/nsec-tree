@@ -1,0 +1,254 @@
+# nsec-tree
+
+> Deterministic Nostr sub-identity derivation from a single master secret. One mnemonic or nsec, unlimited unlinkable identities, optional BIP-340 Schnorr linkage proofs.
+
+nsec-tree is a TypeScript library for Nostr developers who need per-purpose or per-context identities — social, commerce, fleet management, throwaway — all recoverable from a single backup. Unlike NIP-06 (which derives one key), nsec-tree derives an unlimited tree of purpose-tagged identities. Unlike BIP-32 public derivation, child identities are unlinkable by default.
+
+Zero custom crypto. All primitives from audited @noble/@scure libraries (HMAC-SHA256, BIP-32, BIP-340 Schnorr).
+
+ESM-only. Zero runtime dependencies beyond @noble/@scure.
+
+## Getting Started
+
+```bash
+npm install nsec-tree
+```
+
+### From a BIP-39 mnemonic (greenfield)
+
+```typescript
+import { fromMnemonic, derive } from 'nsec-tree'
+
+const root = fromMnemonic('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+const social = derive(root, 'social')
+const commerce = derive(root, 'commerce')
+console.log(social.npub)   // npub1... (unlinkable from commerce)
+console.log(commerce.npub) // npub1... (different identity)
+root.destroy() // zero secret material
+```
+
+### From an existing nsec (existing users)
+
+```typescript
+import { fromNsec, derive } from 'nsec-tree/core' // no BIP-32/39 deps
+
+const root = fromNsec('nsec1...')
+const throwaway = derive(root, 'throwaway', 42)
+root.destroy()
+```
+
+### Build a hierarchy (arbitrary depth)
+
+```typescript
+import { fromMnemonic, deriveFromIdentity } from 'nsec-tree'
+
+const root = fromMnemonic('abandon abandon ... about')
+const work = derive(root, 'work')
+const companyA = deriveFromIdentity(work, 'company:a')
+const payroll = deriveFromIdentity(companyA, 'payroll')
+// Path: master -> work -> company:a -> payroll
+```
+
+### Persona derivation
+
+```typescript
+import { fromMnemonic } from 'nsec-tree'
+import { derivePersona, deriveFromPersona } from 'nsec-tree/persona'
+
+const root = fromMnemonic('abandon abandon ... about')
+const personal = derivePersona(root, 'personal')
+const bitcoiner = derivePersona(root, 'bitcoiner')
+const meetup = deriveFromPersona(bitcoiner, 'canary:group:local-meetup')
+// Hierarchy: master -> bitcoiner -> canary:group:local-meetup
+```
+
+### Linkage proofs (selective disclosure)
+
+```typescript
+import { createBlindProof, verifyProof } from 'nsec-tree/proof'
+
+// Prove master owns child without revealing derivation slot
+const proof = createBlindProof(root, child)
+const valid = verifyProof(proof) // true
+```
+
+### Publish proof to Nostr (NIP-78)
+
+```typescript
+import { toUnsignedEvent, fromEvent } from 'nsec-tree/event'
+
+const unsigned = toUnsignedEvent(proof)
+// Sign with your Nostr library, then publish to relays
+
+// On the verifier side:
+const recovered = fromEvent(signedEvent)
+const isValid = verifyProof(recovered)
+```
+
+### Recovery
+
+```typescript
+import { recover } from 'nsec-tree/core'
+
+const identities = recover(root, ['social', 'commerce', 'work'], 20)
+// Scans 20 indices per purpose, returns Map<string, Identity[]>
+```
+
+### Persona recovery
+
+```typescript
+import { recoverPersonas, DEFAULT_PERSONA_NAMES } from 'nsec-tree/persona'
+
+const recovered = recoverPersonas(root, DEFAULT_PERSONA_NAMES, 2)
+// Scans default names (personal, bitcoiner, work, social, anonymous) at 2 indices each
+```
+
+## Key Concepts
+
+- **TreeRoot** — opaque handle created from a mnemonic (`fromMnemonic`) or existing nsec (`fromNsec`). Holds the master secret. Call `destroy()` when done.
+- **Identity** — a derived child with `nsec`, `npub`, `privateKey`, `publicKey`, `purpose`, and `index`. Each is a fully independent secp256k1 keypair.
+- **Purpose string** — human-readable derivation tag (e.g. `"social"`, `"trott:rider"`, `"402:api:prod"`). Different purposes produce different, unlinkable keys. Case-sensitive, max 255 bytes, no null bytes.
+- **Persona** — a named identity derived using the convention `nostr:persona:{name}`. Supports two-level hierarchy: master -> persona -> group identity.
+- **Linkage proof** — BIP-340 Schnorr attestation that a master owns a child identity. Blind proofs hide the derivation slot; full proofs reveal it.
+- **NIP-78 events** — linkage proofs can be published to Nostr as Kind 30078 application-specific data.
+- **Recovery** — scan known purpose strings to re-derive all identities from the master secret. Deterministic: same input always produces same output.
+
+## API Reference
+
+### Root Creation
+
+| Function | Subpath | Description |
+|----------|---------|-------------|
+| `fromMnemonic(mnemonic, passphrase?)` | `nsec-tree` | Create TreeRoot from BIP-39 mnemonic at `m/44'/1237'/727'/0'/0'` |
+| `fromNsec(nsec)` | `nsec-tree/core` | Create TreeRoot from bech32 nsec string or raw 32-byte key. Intermediate HMAC separates signing key from derivation key |
+
+### Derivation
+
+| Function | Subpath | Description |
+|----------|---------|-------------|
+| `derive(root, purpose, index?)` | `nsec-tree/core` | Derive a child Identity from a TreeRoot. Returns `{ nsec, npub, privateKey, publicKey, purpose, index }` |
+| `deriveFromIdentity(identity, purpose, index?)` | `nsec-tree` | Derive a child from any Identity, enabling arbitrary-depth hierarchies. Creates transient TreeRoot internally |
+| `recover(root, purposes, scanRange?)` | `nsec-tree/core` | Scan purposes x indices for recovery. Returns `Map<string, Identity[]>`. Default scanRange: 20 |
+| `zeroise(identity)` | `nsec-tree/core` | Zero the raw private key bytes of a derived identity |
+
+### Personas
+
+| Function | Subpath | Description |
+|----------|---------|-------------|
+| `derivePersona(root, name, index?)` | `nsec-tree/persona` | Derive a named persona identity using purpose `nostr:persona:{name}` |
+| `deriveFromPersona(persona, purpose, index?)` | `nsec-tree/persona` | Derive sub-identity beneath a persona (two-level hierarchy) |
+| `recoverPersonas(root, names?, scanRange?)` | `nsec-tree/persona` | Recover personas by scanning known names. Defaults to `DEFAULT_PERSONA_NAMES` |
+
+### Linkage Proofs
+
+| Function | Subpath | Description |
+|----------|---------|-------------|
+| `createBlindProof(root, child)` | `nsec-tree/proof` | BIP-340 Schnorr proof that master owns child, without revealing derivation slot |
+| `createFullProof(root, child)` | `nsec-tree/proof` | Like blind proof, but also reveals purpose and index |
+| `verifyProof(proof)` | `nsec-tree/proof` | Verify a LinkageProof. Returns boolean |
+
+### NIP-78 Events
+
+| Function | Subpath | Description |
+|----------|---------|-------------|
+| `toUnsignedEvent(proof)` | `nsec-tree/event` | Convert LinkageProof to unsigned Kind 30078 Nostr event |
+| `fromEvent(event)` | `nsec-tree/event` | Extract LinkageProof from a NIP-78 event's tags |
+
+### Encoding
+
+| Function | Subpath | Description |
+|----------|---------|-------------|
+| `encodeNsec(bytes)` | `nsec-tree/encoding` | Encode raw 32 bytes to bech32 nsec string |
+| `decodeNsec(nsec)` | `nsec-tree/encoding` | Decode bech32 nsec string to raw 32 bytes |
+| `encodeNpub(bytes)` | `nsec-tree/encoding` | Encode raw 32 bytes to bech32 npub string |
+| `decodeNpub(npub)` | `nsec-tree/encoding` | Decode bech32 npub string to raw 32 bytes |
+
+### Constants
+
+| Export | Subpath | Value | Description |
+|--------|---------|-------|-------------|
+| `DEFAULT_SCAN_RANGE` | `nsec-tree` | 20 | Default recovery scan range (BIP-44 gap limit) |
+| `MAX_SCAN_RANGE` | `nsec-tree` | 10,000 | Maximum scan range (prevents self-DoS) |
+| `MAX_INDEX` | `nsec-tree` | 0xFFFFFFFF | Maximum derivation index (uint32) |
+| `NSEC_TREE_EVENT_KIND` | `nsec-tree/event` | 30078 | NIP-78 application-specific data kind |
+| `NSEC_TREE_D_PREFIX` | `nsec-tree/event` | `"nsec-tree:"` | Namespace prefix for d-tags |
+| `DEFAULT_PERSONA_NAMES` | `nsec-tree/persona` | `['personal', 'bitcoiner', 'work', 'social', 'anonymous']` | Default names for persona recovery |
+
+### Types
+
+| Type | Description |
+|------|-------------|
+| `TreeRoot` | Opaque handle. `masterPubkey: string`, `destroy(): void` |
+| `Identity` | `{ nsec, npub, privateKey, publicKey, purpose, index }` |
+| `LinkageProof` | `{ masterPubkey, childPubkey, purpose?, index?, attestation, signature }` |
+| `Persona` | `{ identity: Identity, name: string, index: number }` |
+| `UnsignedEvent` | `{ kind, pubkey, created_at, tags, content }` |
+| `NsecTreeError` | Custom error class for all nsec-tree operations |
+
+## Subpath Exports
+
+| Import | What | BIP-32/39 deps? |
+|--------|------|-----------------|
+| `nsec-tree` | Full API (all functions, types, constants) | Yes |
+| `nsec-tree/core` | fromNsec, derive, recover, zeroise, deriveFromIdentity | No |
+| `nsec-tree/mnemonic` | fromMnemonic only | Yes |
+| `nsec-tree/proof` | createBlindProof, createFullProof, verifyProof | No |
+| `nsec-tree/persona` | derivePersona, deriveFromPersona, recoverPersonas, DEFAULT_PERSONA_NAMES | No |
+| `nsec-tree/event` | toUnsignedEvent, fromEvent, NSEC_TREE_EVENT_KIND, NSEC_TREE_D_PREFIX | No |
+| `nsec-tree/encoding` | encodeNsec, decodeNsec, encodeNpub, decodeNpub | No |
+
+Use `nsec-tree/core` if you only need nsec-based derivation — avoids pulling in BIP-32/39 dependencies.
+
+## Derivation Protocol
+
+### Tree Root (Mnemonic Path)
+
+BIP-39 mnemonic -> BIP-32 seed -> derive at `m/44'/1237'/727'/0'/0'` (all hardened) -> 32-byte tree root.
+
+### Tree Root (nsec Path)
+
+`tree_root = HMAC-SHA256(key = nsec_bytes, msg = "nsec-tree-root")`
+
+Intermediate HMAC ensures the nsec is never used directly as HMAC key. One-way separation between signing key and derivation key.
+
+### Child Key Derivation
+
+`child = HMAC-SHA256(key = tree_root, msg = "nsec-tree\0" || purpose || "\0" || uint32_be(index))`
+
+Domain-separated with null bytes. If HMAC output >= secp256k1 curve order n, index is incremented (probability ~3.7x10^-39).
+
+### Linkage Proof Attestations
+
+- Blind: `"nsec-tree:own:{master_hex}:{child_hex}"`
+- Full: `"nsec-tree:link:{master_hex}:{child_hex}:{purpose}:{index}"`
+
+Signed with BIP-340 Schnorr using the tree root secret.
+
+## Security Model
+
+- **Zero custom crypto** — HMAC-SHA256 (RFC 2104), BIP-32, BIP-340 Schnorr. All from audited @noble/@scure.
+- **Unlinkable by default** — no observer can prove two child npubs share a master without a linkage proof.
+- **One-way derivation** — child keys cannot be reversed to recover the tree root or master secret.
+- **Zeroisation** — `root.destroy()` and `zeroise(identity)` zero secret bytes. `FinalizationRegistry` provides best-effort cleanup.
+- **Master compromise** — if the master secret leaks, all child keys are derivable. No forward secrecy.
+- **Relay correlation caveat** — cryptographic unlinkability does not prevent metadata correlation (IP, timing, relay sets).
+
+## Comparison with Alternatives
+
+| Feature | NIP-06 | NIP-26 | Linked Subkeys (PR #1810) | nsec-tree |
+|---------|--------|--------|---------------------------|-----------|
+| Multiple keys from one seed | Yes (account index) | No | No | Yes (purpose + index) |
+| Purpose-tagged | No | No | No | Yes |
+| Composable hierarchies | No | No | No | Yes |
+| Unlinkable by default | N/A | No (delegation visible) | No (linking is the purpose) | Yes |
+| Selective linkage | No | N/A | Yes (event tags) | Yes (Schnorr proofs) |
+| Recovery scanning | No standard | N/A | No | Yes |
+| Relay/client changes | No | Yes | Client only | No |
+
+## Further Reading
+
+- [PROTOCOL.md](https://github.com/forgesworn/nsec-tree/blob/main/PROTOCOL.md): Full derivation specification with byte-level format and 5 frozen test vectors
+- [docs/faq.md](https://github.com/forgesworn/nsec-tree/blob/main/docs/faq.md): Common questions and objections
+- [docs/comparison.md](https://github.com/forgesworn/nsec-tree/blob/main/docs/comparison.md): Detailed comparison with NIP-06, NIP-26, linked subkeys
+- [docs/NIP-XXXX.md](https://github.com/forgesworn/nsec-tree/blob/main/docs/NIP-XXXX.md): Formal NIP draft specification
+- [README.md](https://github.com/forgesworn/nsec-tree/blob/main/README.md): Quick start, API reference, security model
