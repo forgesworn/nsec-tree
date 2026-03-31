@@ -15,7 +15,7 @@ describe('linkage proofs', () => {
       expect(proof.childPubkey).toHaveLength(64)
       expect(proof.purpose).toBeUndefined()
       expect(proof.index).toBeUndefined()
-      expect(proof.attestation).toMatch(/^nsec-tree:own:/)
+      expect(proof.attestation).toMatch(/^nsec-tree:own\|/)
       expect(proof.signature).toHaveLength(128)
     })
 
@@ -30,11 +30,28 @@ describe('linkage proofs', () => {
       const proof = createFullProof(root, child)
       expect(proof.purpose).toBe('social')
       expect(proof.index).toBe(0)
-      expect(proof.attestation).toMatch(/^nsec-tree:link:/)
+      expect(proof.attestation).toMatch(/^nsec-tree:link\|/)
     })
 
     it('verifies successfully', () => {
       const proof = createFullProof(root, child)
+      expect(verifyProof(proof)).toBe(true)
+    })
+
+    it('correctly handles persona purpose containing colons (nostr:persona:alice)', () => {
+      // Purpose strings like nostr:persona:alice contain colons.
+      // With the old colon delimiter the attestation would be ambiguous:
+      //   nsec-tree:link:abc:def:nostr:persona:alice:0  (8 fields, parser expects 6)
+      // With pipe delimiter the attestation is unambiguous:
+      //   nsec-tree:link|abc|def|nostr:persona:alice|0
+      const personaChild = derive(root, 'nostr:persona:alice', 0)
+      const proof = createFullProof(root, personaChild)
+      expect(proof.purpose).toBe('nostr:persona:alice')
+      expect(proof.index).toBe(0)
+      // Attestation uses pipe delimiters — colons in the purpose are not separators
+      expect(proof.attestation).toMatch(/^nsec-tree:link\|/)
+      expect(proof.attestation).toContain('|nostr:persona:alice|')
+      // Proof must still verify correctly
       expect(verifyProof(proof)).toBe(true)
     })
   })

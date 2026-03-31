@@ -3,6 +3,12 @@ import { NsecTreeError, MAX_SCAN_RANGE } from './types.js'
 import { derive } from './derive.js'
 import { fromNsec } from './root-nsec.js'
 
+function validatePersonaName(name: string): void {
+  if (name.includes('|')) {
+    throw new NsecTreeError('Persona name must not contain pipe characters (|)')
+  }
+}
+
 /** Default persona names scanned during recovery. */
 export const DEFAULT_PERSONA_NAMES = Object.freeze(
   ['personal', 'bitcoiner', 'work', 'social', 'anonymous'] as const,
@@ -25,6 +31,7 @@ export interface Persona {
  * The index parameter enables persona rotation (default 0).
  */
 export function derivePersona(root: TreeRoot, name: string, index = 0): Persona {
+  validatePersonaName(name)
   const purpose = `nostr:persona:${name}`
   const identity = derive(root, purpose, index)
 

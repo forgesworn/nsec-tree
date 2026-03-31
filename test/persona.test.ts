@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { fromNsec } from '../src/root-nsec.js'
 import { derive } from '../src/derive.js'
 import { derivePersona, deriveFromPersona, recoverPersonas, DEFAULT_PERSONA_NAMES } from '../src/persona.js'
+import { NsecTreeError } from '../src/types.js'
 
 describe('derivePersona', () => {
   const root = fromNsec(new Uint8Array(32).fill(0xab))
@@ -51,6 +52,11 @@ describe('derivePersona', () => {
     const persona = derivePersona(root, 'social')
     const direct = derive(root, 'nostr:persona:social', 0)
     expect(persona.identity.nsec).toBe(direct.nsec)
+  })
+
+  it('rejects a name containing a pipe character', () => {
+    expect(() => derivePersona(root, 'bad|name')).toThrow(NsecTreeError)
+    expect(() => derivePersona(root, 'bad|name')).toThrow('pipe')
   })
 })
 

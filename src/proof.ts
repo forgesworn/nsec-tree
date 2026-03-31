@@ -10,11 +10,11 @@ const HEX_KEY_RE = /^[0-9a-f]{64}$/
 const HEX_SIGNATURE_RE = /^[0-9a-f]{128}$/
 
 function blindAttestation(masterHex: string, childHex: string): string {
-  return `nsec-tree:own:${masterHex}:${childHex}`
+  return `nsec-tree:own|${masterHex}|${childHex}`
 }
 
 function fullAttestation(masterHex: string, childHex: string, purpose: string, index: number): string {
-  return `nsec-tree:link:${masterHex}:${childHex}:${purpose}:${index}`
+  return `nsec-tree:link|${masterHex}|${childHex}|${purpose}|${index}`
 }
 
 export function createBlindProof(root: TreeRoot, child: Identity): LinkageProof {
