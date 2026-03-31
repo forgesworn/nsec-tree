@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/forgesworn/nsec-tree/compare/v1.4.1...v1.4.2) (2026-03-31)
+
+
+### Bug Fixes
+
+* change attestation delimiter to pipe to avoid colon collision with persona purposes ([ac62de7](https://github.com/forgesworn/nsec-tree/commit/ac62de79aaa25f3b68a2f8ea382dd4880e145840))
+
 ## [1.4.1](https://github.com/forgesworn/nsec-tree/compare/v1.4.0...v1.4.1) (2026-03-20)
 
 
