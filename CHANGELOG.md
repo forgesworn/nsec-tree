@@ -1,3 +1,10 @@
+## [1.4.3](https://github.com/forgesworn/nsec-tree/compare/v1.4.2...v1.4.3) (2026-03-31)
+
+
+### Bug Fixes
+
+* **protocol:** update attestation format to pipe delimiters in spec docs ([619eb19](https://github.com/forgesworn/nsec-tree/commit/619eb197a79dd695b84b28238a1f4eb223c68f9f))
+
 ## [1.4.2](https://github.com/forgesworn/nsec-tree/compare/v1.4.1...v1.4.2) (2026-03-31)
 
 
