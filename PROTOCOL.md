@@ -194,7 +194,7 @@ to them. Two proof types exist:
 Proves ownership without revealing the derivation slot (purpose/index):
 
 ```
-attestation = "nsec-tree:own:" || hex(master_xonly_pub) || ":" || hex(child_xonly_pub)
+attestation = "nsec-tree:own|" || hex(master_xonly_pub) || "|" || hex(child_xonly_pub)
 ```
 
 ### 5.2 Full Attestation
@@ -202,7 +202,7 @@ attestation = "nsec-tree:own:" || hex(master_xonly_pub) || ":" || hex(child_xonl
 Proves ownership and reveals the derivation slot:
 
 ```
-attestation = "nsec-tree:link:" || hex(master_xonly_pub) || ":" || hex(child_xonly_pub) || ":" || purpose || ":" || decimal(index)
+attestation = "nsec-tree:link|" || hex(master_xonly_pub) || "|" || hex(child_xonly_pub) || "|" || purpose || "|" || decimal(index)
 ```
 
 ### 5.3 Encoding Rules

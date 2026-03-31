@@ -123,7 +123,7 @@ Linkage proofs allow the tree root owner to prove that a child identity belongs 
 Proves ownership without revealing the derivation slot (purpose or index):
 
 ```
-attestation = "nsec-tree:own:" || hex(master_pub) || ":" || hex(child_pub)
+attestation = "nsec-tree:own|" || hex(master_pub) || "|" || hex(child_pub)
 signature   = schnorr_sign(utf8(attestation), tree_root)
 ```
 
@@ -132,7 +132,7 @@ signature   = schnorr_sign(utf8(attestation), tree_root)
 Proves ownership and reveals the derivation slot:
 
 ```
-attestation = "nsec-tree:link:" || hex(master_pub) || ":" || hex(child_pub) || ":" || purpose || ":" || decimal(index)
+attestation = "nsec-tree:link|" || hex(master_pub) || "|" || hex(child_pub) || "|" || purpose || "|" || decimal(index)
 signature   = schnorr_sign(utf8(attestation), tree_root)
 ```
 

@@ -219,8 +219,8 @@ Domain-separated with null bytes. If HMAC output >= secp256k1 curve order n, ind
 
 ### Linkage Proof Attestations
 
-- Blind: `"nsec-tree:own:{master_hex}:{child_hex}"`
-- Full: `"nsec-tree:link:{master_hex}:{child_hex}:{purpose}:{index}"`
+- Blind: `"nsec-tree:own|{master_hex}|{child_hex}"`
+- Full: `"nsec-tree:link|{master_hex}|{child_hex}|{purpose}|{index}"`
 
 Signed with BIP-340 Schnorr using the tree root secret.
 
