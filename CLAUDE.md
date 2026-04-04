@@ -38,6 +38,14 @@ Deterministic Nostr sub-identity derivation library.
 - `nsec-tree/event` — NIP-78 event conversion (toUnsignedEvent, fromEvent, constants)
 - `nsec-tree/encoding` — NIP-19 bech32 helpers (encodeNsec, decodeNsec, encodeNpub, decodeNpub)
 
+## Gotchas
+
+- **`fromNsec()` applies an HMAC intermediate** to derive the tree root — it is NOT the same as using the raw nsec bytes directly. The Rust side (`heartwood-core`) uses `from_nsec_bytes()` which does the same HMAC step. These must produce identical output.
+- **Purpose strings are validated** — must be non-empty, lowercase alphanumeric with hyphens/underscores/slashes. Slashes act as namespace separators (e.g. `persona/forgesworn`, `client/bray`).
+- **`zeroise()` must be called** on `TreeRoot` when done — secrets are held in memory until explicitly cleared. The `secret` field is not exposed in the public API by design.
+- **Persona derivation is two-level** — `derivePersona()` derives from the tree root, then persona children derive from the persona. This means recovering a persona requires the tree root, not just the persona key.
+- **Linkage proofs come in two forms** — `createBlindProof()` (proves two pubkeys share a root without revealing it) and `createFullProof()` (reveals the derivation path). Choose based on privacy requirements.
+
 ## Design spec
 
 `trott-business/docs/plans/2026-03-18-nsec-tree-design.md`
