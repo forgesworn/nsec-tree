@@ -1,0 +1,38 @@
+# Cursor Rules — nsec-tree
+
+Deterministic Nostr sub-identity derivation from a single master secret.
+
+## Commands
+
+- `npm run build` — compile TypeScript
+- `npm test` — run all tests (vitest, 134 tests)
+- `npm run typecheck` — type-check without emitting
+
+## Conventions
+
+- British English — colour, initialise, zeroise, behaviour
+- ESM-only — `"type": "module"`, no CJS output
+- TDD — failing test first, minimal implementation, commit
+- Commits: `type: description` (feat:, fix:, test:, docs:, chore:). No Co-Authored-By lines.
+- Branches — work on branches; merge to main triggers semantic-release publish
+
+## Key Patterns
+
+- `fromNsec()` applies an HMAC intermediate — NOT raw nsec bytes; must match `heartwood-core::from_nsec_bytes()`
+- Purpose strings — non-empty, lowercase alphanumeric with hyphens/underscores/slashes; slashes are namespace separators
+- `zeroise()` is mandatory — tree root holds secrets in memory until explicitly cleared
+- `core.ts` must never import `root-mnemonic.ts` — keeps BIP-32/39 out of the `/core` subpath
+- Persona derivation is two-level — persona children derive from the persona root, not the tree root
+- Two proof forms — `createBlindProof()` hides root; `createFullProof()` reveals derivation path
+- Frozen test vectors in `test/vectors.test.ts` — never modify; they are canonical
+
+## Structure
+
+- `src/types.ts` — interfaces, error class, constants
+- `src/derive.ts` — HMAC-SHA256 child key derivation
+- `src/root-nsec.ts` — `fromNsec()`, HMAC intermediate, FinalizationRegistry
+- `src/root-mnemonic.ts` — `fromMnemonic()` via BIP-32 at m/44'/1237'/727'/0'/0'
+- `src/proof.ts` — BIP-340 Schnorr linkage proofs
+- `src/persona.ts` — named persona derivation, two-level hierarchy
+- `src/event.ts` — NIP-78 Kind 30078 conversion
+- `src/recover.ts` — scan-based identity recovery

@@ -2,6 +2,8 @@
 
 **Nostr:** [`npub1mgvlrnf5hm9yf0n5mf9nqmvarhvxkc6remu5ec3vf8r0txqkuk7su0e7q2`](https://njump.me/npub1mgvlrnf5hm9yf0n5mf9nqmvarhvxkc6remu5ec3vf8r0txqkuk7su0e7q2)
 
+[![CI](https://github.com/forgesworn/nsec-tree/actions/workflows/ci.yml/badge.svg)](https://github.com/forgesworn/nsec-tree/actions/workflows/ci.yml)
+
 Deterministic Nostr identity hierarchies. One master secret, unlimited identities.
 
 ```
