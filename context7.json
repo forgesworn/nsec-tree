@@ -1,0 +1,10 @@
+{
+  "projectTitle": "nsec-tree",
+  "description": "Deterministic Nostr sub-identity derivation — generate purpose-specific keypairs from one master secret. TypeScript.",
+  "excludeFolders": ["node_modules", "dist", "coverage", "src", "test", ".github", ".changeset"],
+  "rules": [
+    "Derivation is deterministic — the same path always produces the same keypair.",
+    "Use slash-separated paths: derive(masterSecret, 'chat/relay1') for purpose-specific identities.",
+    "Never expose the master secret — only derived keys should be used in applications."
+  ]
+}
