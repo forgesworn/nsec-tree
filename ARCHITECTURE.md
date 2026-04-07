@@ -25,6 +25,17 @@ graph TB
     P1 -->|"deriveFromPersona (new sub-root)"| G2["Group: close-friends"]
     P2 -->|"deriveFromPersona (new sub-root)"| G3["Group: company:acme"]
     G3 -->|"deriveFromIdentity (new sub-root)"| L1["Leaf: payroll"]
+
+    style MNEMONIC fill:#1e293b,color:#e2e8f0
+    style NSEC fill:#1e293b,color:#e2e8f0
+    style ROOT fill:#ef4444,color:#fff
+    style P1 fill:#f59e0b,color:#000
+    style P2 fill:#f59e0b,color:#000
+    style P3 fill:#f59e0b,color:#000
+    style G1 fill:#3b82f6,color:#fff
+    style G2 fill:#3b82f6,color:#fff
+    style G3 fill:#3b82f6,color:#fff
+    style L1 fill:#3b82f6,color:#fff
 ```
 
 Personas derive directly from the master root. Groups and deeper nodes derive from a **new sub-root** created from the parent's private key via `fromNsec()`. This re-keying step is the core isolation property: compromising a persona key lets an attacker derive its groups, but the groups cannot be derived from the master root with a longer purpose string.
