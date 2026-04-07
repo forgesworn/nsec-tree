@@ -285,6 +285,8 @@ verifyProof(proof) // true — same master, new identity
 
 ### Ecosystem integration
 
+> For internal architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 nsec-tree personas are designed to compose with other libraries:
 
 - **canary-kit** — `deriveFromPersona(persona, 'canary:group:...')` produces
