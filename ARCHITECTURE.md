@@ -17,15 +17,17 @@ graph TB
 
     ROOT["Tree Root (32 bytes)"]
 
-    ROOT -->|"purpose: nostr:persona:personal"| P1["Persona: personal"]
-    ROOT -->|"purpose: nostr:persona:work"| P2["Persona: work"]
-    ROOT -->|"purpose: nostr:persona:bitcoiner"| P3["Persona: bitcoiner"]
+    ROOT -->|"derive(root, 'nostr:persona:personal')"| P1["Persona: personal"]
+    ROOT -->|"derive(root, 'nostr:persona:work')"| P2["Persona: work"]
+    ROOT -->|"derive(root, 'nostr:persona:bitcoiner')"| P3["Persona: bitcoiner"]
 
-    P1 -->|"purpose: family-chat"| G1["Group: family-chat"]
-    P1 -->|"purpose: close-friends"| G2["Group: close-friends"]
-    P2 -->|"purpose: company:acme"| G3["Group: company:acme"]
-    G3 -->|"purpose: payroll"| L1["Leaf: payroll"]
+    P1 -->|"deriveFromPersona (new sub-root)"| G1["Group: family-chat"]
+    P1 -->|"deriveFromPersona (new sub-root)"| G2["Group: close-friends"]
+    P2 -->|"deriveFromPersona (new sub-root)"| G3["Group: company:acme"]
+    G3 -->|"deriveFromIdentity (new sub-root)"| L1["Leaf: payroll"]
 ```
+
+Personas derive directly from the master root. Groups and deeper nodes derive from a **new sub-root** created from the parent's private key via `fromNsec()`. This re-keying step is the core isolation property: compromising a persona key lets an attacker derive its groups, but the groups cannot be derived from the master root with a longer purpose string.
 
 Each derivation step computes `HMAC-SHA256(parent_secret, context)` where context is:
 
