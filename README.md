@@ -296,6 +296,12 @@ nsec-tree personas are designed to compose with other libraries:
   duress alerts, and liveness checks.
 - **spoken-token** — bind a spoken verification token to a persona's public key
   for identity confirmation over voice calls.
+- **[heartwood](https://github.com/forgesworn/heartwood)** — hardware signing
+  appliance that implements nsec-tree in Rust on a Pi Zero 2 W, serving NIP-46
+  remote signing over Tor.
+- **[bark](https://github.com/forgesworn/bark)** — browser extension that
+  connects to heartwood (or any NIP-46 bunker) for NIP-07 signing with
+  per-persona identity selection.
 
 ### Security model
 
