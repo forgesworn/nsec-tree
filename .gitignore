@@ -9,3 +9,6 @@ dist/
 *.nsec
 coverage/
 docs/superpowers/
+
+# IDE
+.idea/
