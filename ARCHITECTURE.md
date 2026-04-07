@@ -54,8 +54,12 @@ Prove two pubkeys share a master without revealing the master or derivation path
 
 ```mermaid
 sequenceDiagram
-    participant O as Key Owner
-    participant V as Verifier
+    box rgb(249, 158, 11) Prover
+        participant O as Key Owner
+    end
+    box rgb(59, 130, 246) Consumer
+        participant V as Verifier
+    end
 
     Note over O: Holds master + child private keys
 
