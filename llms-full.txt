@@ -190,7 +190,7 @@ const recovered = recoverPersonas(root, DEFAULT_PERSONA_NAMES, 2)
 | Import | What | BIP-32/39 deps? |
 |--------|------|-----------------|
 | `nsec-tree` | Full API (all functions, types, constants) | Yes |
-| `nsec-tree/core` | fromNsec, derive, recover, zeroise, deriveFromIdentity | No |
+| `nsec-tree/core` | fromNsec, derive, recover, zeroise | No |
 | `nsec-tree/mnemonic` | fromMnemonic only | Yes |
 | `nsec-tree/proof` | createBlindProof, createFullProof, verifyProof | No |
 | `nsec-tree/persona` | derivePersona, deriveFromPersona, recoverPersonas, DEFAULT_PERSONA_NAMES | No |
