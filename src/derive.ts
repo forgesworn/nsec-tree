@@ -44,6 +44,10 @@ export function deriveChildKey(root: Uint8Array, purpose: string, index = 0): De
       const publicKey = schnorr.getPublicKey(derived) // 32-byte x-only (BIP-340)
       return { privateKey: derived, publicKey, actualIndex: currentIndex }
     } catch {
+      // Invalid scalar (≥ curve order, probability ≈ 2^-128). Scrub the
+      // candidate before retrying so the failed material does not linger
+      // on the heap.
+      derived.fill(0)
       currentIndex++
     }
   }
