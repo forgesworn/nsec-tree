@@ -1,3 +1,13 @@
+## [1.4.4](https://github.com/forgesworn/nsec-tree/compare/v1.4.3...v1.4.4) (2026-04-10)
+
+
+### Bug Fixes
+
+* bound recovery purpose array length ([77d12ea](https://github.com/forgesworn/nsec-tree/commit/77d12ea6c47dfd5836a89f846d38055b94818458))
+* harden linkage proof and event parsing against injection ([fa4ff57](https://github.com/forgesworn/nsec-tree/commit/fa4ff57debfc8f9405d88fea4b7350167bb69f76))
+* tighten persona name validation ([1add0a5](https://github.com/forgesworn/nsec-tree/commit/1add0a5d216315db6a26d24ac4a02cb164506ba7))
+* tighten secret hygiene and document ownership contracts ([5d93940](https://github.com/forgesworn/nsec-tree/commit/5d9394091818a3a33a25f95368cfe6df0de06917))
+
 ## [1.4.3](https://github.com/forgesworn/nsec-tree/compare/v1.4.2...v1.4.3) (2026-03-31)
 
 
