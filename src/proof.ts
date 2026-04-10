@@ -56,9 +56,11 @@ export function createFullProof(root: TreeRoot, child: Identity): LinkageProof {
 
 /**
  * Reconstruct the canonical attestation string from a LinkageProof's fields,
- * or return null if the fields are structurally invalid. Used by both
- * `verifyProof` and (via an internal re-export) `toUnsignedEvent` for
- * shape validation before event serialisation.
+ * or return `null` if the fields are structurally invalid (wrong types, bad
+ * hex, out-of-range index, reserved characters in purpose, mismatched
+ * purpose/index optional pair). Used by `verifyProof` for the canonical
+ * equality check and by `toUnsignedEvent` for cheap shape validation
+ * before serialising a proof to a Nostr event.
  */
 export function canonicalAttestation(proof: LinkageProof): string | null {
   if (typeof proof.masterPubkey !== 'string' || typeof proof.childPubkey !== 'string') {
