@@ -1,5 +1,5 @@
 import type { Identity, TreeRoot } from './types.js'
-import { DEFAULT_SCAN_RANGE, MAX_SCAN_RANGE, NsecTreeError } from './types.js'
+import { DEFAULT_SCAN_RANGE, MAX_SCAN_RANGE, MAX_RECOVERY_PURPOSES, NsecTreeError } from './types.js'
 import { derive } from './derive.js'
 
 export function recover(
@@ -9,6 +9,11 @@ export function recover(
 ): Map<string, Identity[]> {
   if (!Array.isArray(purposes)) {
     throw new NsecTreeError('purposes must be an array of strings')
+  }
+  if (purposes.length > MAX_RECOVERY_PURPOSES) {
+    throw new NsecTreeError(
+      `purposes array exceeds maximum (${MAX_RECOVERY_PURPOSES}), got ${purposes.length}`,
+    )
   }
   if (!Number.isInteger(scanRange) || scanRange < 1 || scanRange > MAX_SCAN_RANGE) {
     throw new NsecTreeError(`scanRange must be an integer in [1, ${MAX_SCAN_RANGE}], got ${scanRange}`)

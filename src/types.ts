@@ -19,10 +19,16 @@ export interface TreeRoot {
  */
 export const rootSecrets = new WeakMap<TreeRoot, Uint8Array>()
 
-/** Retrieve the secret for a TreeRoot, or throw if destroyed. */
+/**
+ * Retrieve the secret for a TreeRoot, or throw if destroyed.
+ *
+ * `destroy()` zero-fills the secret buffer AND deletes the WeakMap entry, so
+ * a missing entry is the authoritative "destroyed" signal. Do not copy the
+ * returned reference; consume it synchronously inside the caller.
+ */
 export function getSecret(root: TreeRoot): Uint8Array {
   const secret = rootSecrets.get(root)
-  if (!secret || secret.every(b => b === 0)) {
+  if (!secret) {
     throw new NsecTreeError('TreeRoot has been destroyed')
   }
   return secret
@@ -68,3 +74,6 @@ export const DEFAULT_SCAN_RANGE = 20
 
 /** Maximum scan range for recovery (prevents self-DoS). */
 export const MAX_SCAN_RANGE = 10_000
+
+/** Maximum purpose/name array length for recovery (prevents self-DoS). */
+export const MAX_RECOVERY_PURPOSES = 1_000

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { fromNsec } from '../src/root-nsec.js'
 import { derive } from '../src/derive.js'
 import { recover } from '../src/recover.js'
+import { MAX_RECOVERY_PURPOSES } from '../src/types.js'
 
 describe('recover', () => {
   const root = fromNsec(new Uint8Array(32).fill(0xab))
@@ -49,5 +50,15 @@ describe('recover', () => {
 
   it('rejects non-array purposes', () => {
     expect(() => recover(root, 'social' as unknown as string[])).toThrow('array')
+  })
+
+  it('rejects purposes array exceeding MAX_RECOVERY_PURPOSES (security fix)', () => {
+    const huge = new Array(MAX_RECOVERY_PURPOSES + 1).fill('p')
+    expect(() => recover(root, huge, 1)).toThrow('exceeds maximum')
+  })
+
+  it('accepts purposes array of exactly MAX_RECOVERY_PURPOSES', () => {
+    const max = new Array(MAX_RECOVERY_PURPOSES).fill(0).map((_, i) => `p${i}`)
+    expect(() => recover(root, max, 1)).not.toThrow()
   })
 })
