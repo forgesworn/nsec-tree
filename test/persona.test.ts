@@ -56,7 +56,28 @@ describe('derivePersona', () => {
 
   it('rejects a name containing a pipe character', () => {
     expect(() => derivePersona(root, 'bad|name')).toThrow(NsecTreeError)
-    expect(() => derivePersona(root, 'bad|name')).toThrow('pipe')
+    expect(() => derivePersona(root, 'bad|name')).toThrow('"|"')
+  })
+
+  it('rejects a name containing a newline', () => {
+    expect(() => derivePersona(root, 'bad\nname')).toThrow(NsecTreeError)
+    expect(() => derivePersona(root, 'bad\nname')).toThrow('control characters')
+  })
+
+  it('rejects a name containing a tab', () => {
+    expect(() => derivePersona(root, 'bad\tname')).toThrow(NsecTreeError)
+  })
+
+  it('rejects a name containing a null byte', () => {
+    expect(() => derivePersona(root, 'bad\0name')).toThrow(NsecTreeError)
+  })
+
+  it('rejects an empty name', () => {
+    expect(() => derivePersona(root, '')).toThrow('empty')
+  })
+
+  it('rejects a whitespace-only name', () => {
+    expect(() => derivePersona(root, '   ')).toThrow('whitespace')
   })
 })
 

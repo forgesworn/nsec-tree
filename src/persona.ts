@@ -1,11 +1,27 @@
 import type { Identity, TreeRoot } from './types.js'
-import { NsecTreeError, MAX_SCAN_RANGE } from './types.js'
+import { NsecTreeError, MAX_SCAN_RANGE, MAX_RECOVERY_PURPOSES } from './types.js'
 import { derive } from './derive.js'
 import { fromNsec } from './root-nsec.js'
 
+// Pipe is reserved for the linkage-proof attestation delimiter (PROTOCOL.md §5).
+// Control chars are rejected because they would create ambiguity in logging,
+// display, and cross-implementation storage without adding functionality.
+const PERSONA_NAME_UNSAFE_RE = /[\x00-\x1F\x7F|]/
+
 function validatePersonaName(name: string): void {
-  if (name.includes('|')) {
-    throw new NsecTreeError('Persona name must not contain pipe characters (|)')
+  if (typeof name !== 'string') {
+    throw new NsecTreeError('Persona name must be a string')
+  }
+  if (name.length === 0) {
+    throw new NsecTreeError('Persona name must not be empty')
+  }
+  if (name.trim().length === 0) {
+    throw new NsecTreeError('Persona name must not be whitespace-only')
+  }
+  if (PERSONA_NAME_UNSAFE_RE.test(name)) {
+    throw new NsecTreeError(
+      'Persona name must not contain "|" or control characters',
+    )
   }
 }
 
@@ -69,6 +85,14 @@ export function recoverPersonas(
   names: readonly string[] = DEFAULT_PERSONA_NAMES,
   scanRange = 1,
 ): Map<string, Persona[]> {
+  if (!Array.isArray(names)) {
+    throw new NsecTreeError('names must be an array of strings')
+  }
+  if (names.length > MAX_RECOVERY_PURPOSES) {
+    throw new NsecTreeError(
+      `names array exceeds maximum (${MAX_RECOVERY_PURPOSES}), got ${names.length}`,
+    )
+  }
   if (!Number.isInteger(scanRange) || scanRange < 1 || scanRange > MAX_SCAN_RANGE) {
     throw new NsecTreeError(`scanRange must be an integer in [1, ${MAX_SCAN_RANGE}], got ${scanRange}`)
   }
