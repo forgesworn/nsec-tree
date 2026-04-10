@@ -68,7 +68,7 @@ ESM-only. `"type": "module"` in package.json. No CJS output.
 ## Key Patterns / Gotchas
 
 - `fromNsec()` applies an HMAC intermediate -- it is NOT the same as using raw nsec bytes directly. The Rust counterpart (`heartwood-core::from_nsec_bytes()`) applies the same step; both sides must produce identical output.
-- Purpose strings are validated -- must be non-empty, lowercase alphanumeric with hyphens, underscores, or slashes. Slashes act as namespace separators (e.g. `persona/forgesworn`, `client/bray`).
+- Purpose strings are validated -- non-empty, ≤255 UTF-8 bytes, no null bytes, not whitespace-only. Case-sensitive, no character-set restriction. Recommended convention: lowercase colon-separated namespaces (e.g. `nostr:persona:forgesworn`, `client:bray`). `validateProofPurpose` additionally rejects `|` and control chars to keep the pipe-delimited linkage-proof attestation format unambiguous.
 - `zeroise()` is mandatory -- `TreeRoot` holds secrets in memory until explicitly cleared. The `secret` field is not exposed in the public API.
 - `core.ts` must never import `root-mnemonic.ts` -- this constraint keeps BIP-32/39 out of the `nsec-tree/core` subpath. CI enforces it.
 - Persona derivation is two-level -- `derivePersona()` derives from the tree root, then persona children derive from the persona. Recovering a persona requires the tree root.

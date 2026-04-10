@@ -1,16 +1,18 @@
 # nsec-tree
 
-**Nostr:** [`npub1mgvlrnf5hm9yf0n5mf9nqmvarhvxkc6remu5ec3vf8r0txqkuk7su0e7q2`](https://njump.me/npub1mgvlrnf5hm9yf0n5mf9nqmvarhvxkc6remu5ec3vf8r0txqkuk7su0e7q2)
+> Deterministic Nostr identity hierarchies. One master secret, unlimited identities.
 
 [![CI](https://github.com/forgesworn/nsec-tree/actions/workflows/ci.yml/badge.svg)](https://github.com/forgesworn/nsec-tree/actions/workflows/ci.yml)
-
-Deterministic Nostr identity hierarchies. One master secret, unlimited identities.
+[![npm](https://img.shields.io/npm/v/nsec-tree.svg)](https://www.npmjs.com/package/nsec-tree)
+[![Context7](https://img.shields.io/badge/Context7-indexed-blue)](https://context7.com/forgesworn/nsec-tree)
 
 ```
 npm install nsec-tree
 ```
 
 ESM-only. Zero custom crypto — all primitives from @noble/@scure.
+
+**Discuss:** [NIP draft](docs/NIP-XXXX.md) · [FAQ](docs/faq.md) · **Nostr:** [`npub1mgvlrnf5hm9yf0n5mf9nqmvarhvxkc6remu5ec3vf8r0txqkuk7su0e7q2`](https://njump.me/npub1mgvlrnf5hm9yf0n5mf9nqmvarhvxkc6remu5ec3vf8r0txqkuk7su0e7q2)
 
 ## Why nsec-tree?
 
@@ -330,6 +332,7 @@ Runnable examples in the [`examples/`](examples/) directory:
 | [linkage-proofs.ts](examples/linkage-proofs.ts) | Blind and full ownership proofs |
 | [bot-fleet.ts](examples/bot-fleet.ts) | 10 bots from one seed |
 | [nostr-event-signing.ts](examples/nostr-event-signing.ts) | Sign a kind-1 event with nostr-tools |
+| [nip78-event.ts](examples/nip78-event.ts) | NIP-78 round-trip — `toUnsignedEvent` / `fromEvent` |
 | [persona.ts](examples/persona.ts) | Persona derivation, deep hierarchies, rotation, recovery |
 
 Run any example: `npx tsx examples/<name>.ts`

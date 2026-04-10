@@ -2,6 +2,7 @@
   "name": "nsec-tree",
   "version": "1.4.4",
   "description": "Deterministic Nostr sub-identity derivation from a single master secret",
+  "author": "forgesworn",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -43,8 +44,12 @@
     "dist",
     "LICENSE",
     "PROTOCOL.md",
-    "llms.txt"
+    "llms.txt",
+    "llms-full.txt"
   ],
+  "publishConfig": {
+    "provenance": true
+  },
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
@@ -78,11 +83,17 @@
     "identity",
     "bip32",
     "bip39",
-    "bip85",
     "derivation",
+    "key-derivation",
+    "deterministic",
     "secp256k1",
+    "schnorr",
+    "bech32",
+    "mnemonic",
     "privacy",
     "persona",
+    "nip-06",
+    "nip-19",
     "nip-78",
     "linkage-proof",
     "sub-identity"
@@ -92,6 +103,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/forgesworn/nsec-tree.git"
+  },
+  "bugs": {
+    "url": "https://github.com/forgesworn/nsec-tree/issues"
   },
   "funding": {
     "type": "lightning",
