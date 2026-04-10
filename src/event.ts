@@ -1,13 +1,22 @@
 import type { LinkageProof } from './types.js'
 import { NsecTreeError, MAX_INDEX } from './types.js'
+import { canonicalAttestation } from './proof.js'
 
 const HEX_KEY_RE = /^[0-9a-f]{64}$/
 const HEX_SIGNATURE_RE = /^[0-9a-f]{128}$/
 const STRICT_UINT_RE = /^(?:0|[1-9]\d*)$/
 
-function getTagValue(tags: string[][], name: string): string | undefined {
-  const tag = tags.find(t => t[0] === name)
-  return tag?.[1]
+/**
+ * Get the single tag value for `name`. Throws on duplicates to prevent
+ * "duplicate tag smuggling" where a crafted event contains two copies of an
+ * nsec-tree tag and different verifiers pick different ones.
+ */
+function getSingleTagValue(tags: string[][], name: string): string | undefined {
+  const matches = tags.filter(t => t[0] === name)
+  if (matches.length > 1) {
+    throw new NsecTreeError(`Duplicate "${name}" tag: event must contain at most one`)
+  }
+  return matches[0]?.[1]
 }
 
 /** NIP-78 application-specific data kind. */
@@ -28,9 +37,21 @@ export interface UnsignedEvent {
 /**
  * Convert a LinkageProof to an unsigned NIP-78 (Kind 30078) Nostr event.
  * The application signs and publishes this with their own Nostr library.
- * Does not validate the proof — the caller is responsible for passing a valid LinkageProof.
+ *
+ * Performs a structural sanity check (hex formats, purpose/index consistency,
+ * purpose does not contain reserved characters, and `proof.attestation` matches
+ * the canonical reconstruction) but does NOT verify the Schnorr signature.
+ * Run `verifyProof` if you need full cryptographic validation.
  */
 export function toUnsignedEvent(proof: LinkageProof): UnsignedEvent {
+  const expected = canonicalAttestation(proof)
+  if (expected === null) {
+    throw new NsecTreeError('Invalid proof: structurally malformed')
+  }
+  if (proof.attestation !== expected) {
+    throw new NsecTreeError('Invalid proof: attestation does not match canonical form')
+  }
+
   const tags: string[][] = [
     ['d', `${NSEC_TREE_D_PREFIX}${proof.childPubkey}`],
     ['p', proof.childPubkey],
@@ -59,17 +80,17 @@ export function toUnsignedEvent(proof: LinkageProof): UnsignedEvent {
  * Throws NsecTreeError if the event does not contain a valid nsec-tree proof.
  */
 export function fromEvent(event: { pubkey: string; tags: string[][] }): LinkageProof {
-  const dValue = getTagValue(event.tags, 'd')
+  const dValue = getSingleTagValue(event.tags, 'd')
   if (!dValue || !dValue.startsWith(NSEC_TREE_D_PREFIX)) {
     throw new NsecTreeError('Missing or invalid d tag: expected nsec-tree: prefix')
   }
 
-  const attestation = getTagValue(event.tags, 'attestation')
+  const attestation = getSingleTagValue(event.tags, 'attestation')
   if (!attestation) {
     throw new NsecTreeError('Missing attestation tag')
   }
 
-  const signature = getTagValue(event.tags, 'proof-sig')
+  const signature = getSingleTagValue(event.tags, 'proof-sig')
   if (!signature) {
     throw new NsecTreeError('Missing proof-sig tag')
   }
@@ -79,7 +100,7 @@ export function fromEvent(event: { pubkey: string; tags: string[][] }): LinkageP
     throw new NsecTreeError(`Invalid childPubkey in d tag: expected 64-char lowercase hex`)
   }
 
-  const pValue = getTagValue(event.tags, 'p')
+  const pValue = getSingleTagValue(event.tags, 'p')
   if (!pValue) {
     throw new NsecTreeError('Missing p tag')
   }
@@ -94,8 +115,8 @@ export function fromEvent(event: { pubkey: string; tags: string[][] }): LinkageP
     throw new NsecTreeError(`Invalid proof-sig: expected 128-char lowercase hex`)
   }
 
-  const purposeValue = getTagValue(event.tags, 'purpose')
-  const indexValue = getTagValue(event.tags, 'index')
+  const purposeValue = getSingleTagValue(event.tags, 'purpose')
+  const indexValue = getSingleTagValue(event.tags, 'index')
 
   const hasPurpose = purposeValue !== undefined
   const hasIndex = indexValue !== undefined

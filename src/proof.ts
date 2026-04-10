@@ -3,7 +3,7 @@ import type { LinkageProof, Identity, TreeRoot } from './types.js'
 import { MAX_INDEX } from './types.js'
 import { getSecret } from './types.js'
 import { bytesToHex, hexToBytes } from './encoding.js'
-import { validatePurpose } from './validate.js'
+import { validateProofPurpose } from './validate.js'
 
 const encoder = new TextEncoder()
 const HEX_KEY_RE = /^[0-9a-f]{64}$/
@@ -35,6 +35,7 @@ export function createBlindProof(root: TreeRoot, child: Identity): LinkageProof 
 }
 
 export function createFullProof(root: TreeRoot, child: Identity): LinkageProof {
+  validateProofPurpose(child.purpose)
   const secret = getSecret(root)
   const masterPub = schnorr.getPublicKey(secret)
   const masterHex = bytesToHex(masterPub)
@@ -53,7 +54,16 @@ export function createFullProof(root: TreeRoot, child: Identity): LinkageProof {
   }
 }
 
-function canonicalAttestation(proof: LinkageProof): string | null {
+/**
+ * Reconstruct the canonical attestation string from a LinkageProof's fields,
+ * or return null if the fields are structurally invalid. Used by both
+ * `verifyProof` and (via an internal re-export) `toUnsignedEvent` for
+ * shape validation before event serialisation.
+ */
+export function canonicalAttestation(proof: LinkageProof): string | null {
+  if (typeof proof.masterPubkey !== 'string' || typeof proof.childPubkey !== 'string') {
+    return null
+  }
   if (!HEX_KEY_RE.test(proof.masterPubkey) || !HEX_KEY_RE.test(proof.childPubkey)) {
     return null
   }
@@ -74,12 +84,12 @@ function canonicalAttestation(proof: LinkageProof): string | null {
     return null
   }
 
-  if (!Number.isInteger(index) || index < 0 || index > MAX_INDEX) {
+  if (typeof index !== 'number' || !Number.isInteger(index) || index < 0 || index > MAX_INDEX) {
     return null
   }
 
   try {
-    validatePurpose(purpose)
+    validateProofPurpose(purpose)
   } catch {
     return null
   }
@@ -89,12 +99,22 @@ function canonicalAttestation(proof: LinkageProof): string | null {
 
 export function verifyProof(proof: LinkageProof): boolean {
   try {
+    if (proof === null || typeof proof !== 'object') {
+      return false
+    }
     const attestation = canonicalAttestation(proof)
-    if (!attestation || proof.attestation !== attestation || !HEX_SIGNATURE_RE.test(proof.signature)) {
+    if (!attestation || proof.attestation !== attestation) {
+      return false
+    }
+    if (typeof proof.signature !== 'string' || !HEX_SIGNATURE_RE.test(proof.signature)) {
       return false
     }
 
-    const msgBytes = encoder.encode(proof.attestation)
+    // Sign/verify over the RECONSTRUCTED canonical attestation, not the
+    // caller-supplied proof.attestation. These are proven equal above via
+    // strict equality; using the local `attestation` makes the invariant
+    // explicit and resilient to future refactors of that comparison.
+    const msgBytes = encoder.encode(attestation)
     const sigBytes = hexToBytes(proof.signature)
     const pubBytes = hexToBytes(proof.masterPubkey)
     return schnorr.verify(sigBytes, msgBytes, pubBytes)

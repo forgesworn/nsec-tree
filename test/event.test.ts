@@ -239,6 +239,84 @@ describe('fromEvent', () => {
       expect(() => fromEvent(event)).toThrow('proof-sig')
     })
   })
+
+  describe('duplicate tag rejection (security fix)', () => {
+    it('throws on duplicate attestation tag', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      event.tags.push(['attestation', 'nsec-tree:link|aa|bb|forged|0'])
+      expect(() => fromEvent(event)).toThrow('Duplicate "attestation"')
+    })
+
+    it('throws on duplicate proof-sig tag', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      event.tags.push(['proof-sig', '00'.repeat(64)])
+      expect(() => fromEvent(event)).toThrow('Duplicate "proof-sig"')
+    })
+
+    it('throws on duplicate d tag', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      event.tags.push(['d', 'nsec-tree:' + 'cc'.repeat(32)])
+      expect(() => fromEvent(event)).toThrow('Duplicate "d"')
+    })
+
+    it('throws on duplicate p tag', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      event.tags.push(['p', 'dd'.repeat(32)])
+      expect(() => fromEvent(event)).toThrow('Duplicate "p"')
+    })
+
+    it('throws on duplicate purpose tag', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      event.tags.push(['purpose', 'forged'])
+      expect(() => fromEvent(event)).toThrow('Duplicate "purpose"')
+    })
+
+    it('throws on duplicate index tag', () => {
+      const proof = createFullProof(root, child)
+      const event = toUnsignedEvent(proof)
+      event.tags.push(['index', '999'])
+      expect(() => fromEvent(event)).toThrow('Duplicate "index"')
+    })
+  })
+})
+
+describe('toUnsignedEvent structural validation (security fix)', () => {
+  const root = fromNsec(new Uint8Array(32).fill(0xab))
+  const child = derive(root, 'social', 0)
+
+  it('accepts a well-formed proof', () => {
+    const proof = createFullProof(root, child)
+    expect(() => toUnsignedEvent(proof)).not.toThrow()
+  })
+
+  it('throws when attestation does not match canonical reconstruction', () => {
+    const proof = createFullProof(root, child)
+    const tampered = { ...proof, attestation: proof.attestation + 'x' }
+    expect(() => toUnsignedEvent(tampered)).toThrow('canonical form')
+  })
+
+  it('throws when purpose and index are inconsistent (purpose without index)', () => {
+    const proof = createBlindProof(root, child)
+    const bogus = { ...proof, purpose: 'social' }
+    expect(() => toUnsignedEvent(bogus)).toThrow('malformed')
+  })
+
+  it('throws when masterPubkey is not 64-char hex', () => {
+    const proof = createBlindProof(root, child)
+    const bogus = { ...proof, masterPubkey: 'zz'.repeat(32) }
+    expect(() => toUnsignedEvent(bogus)).toThrow('malformed')
+  })
+
+  it('throws when childPubkey is uppercase hex', () => {
+    const proof = createBlindProof(root, child)
+    const bogus = { ...proof, childPubkey: proof.childPubkey.toUpperCase() }
+    expect(() => toUnsignedEvent(bogus)).toThrow('malformed')
+  })
 })
 
 describe('event barrel exports', () => {

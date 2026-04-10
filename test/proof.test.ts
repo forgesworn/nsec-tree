@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest'
 import { fromNsec } from '../src/root-nsec.js'
-import { derive } from '../src/derive.js'
+import { derive, deriveChildKey } from '../src/derive.js'
 import { createBlindProof, createFullProof, verifyProof } from '../src/proof.js'
-import { bytesToHex } from '../src/encoding.js'
+import { bytesToHex, encodeNsec, encodeNpub } from '../src/encoding.js'
+import { getSecret, NsecTreeError } from '../src/types.js'
+import type { Identity } from '../src/types.js'
 
 describe('linkage proofs', () => {
   const root = fromNsec(new Uint8Array(32).fill(0xab))
@@ -100,6 +102,71 @@ describe('linkage proofs', () => {
     it('returns false for null or undefined input', () => {
       expect(verifyProof(null as unknown as Parameters<typeof verifyProof>[0])).toBe(false)
       expect(verifyProof(undefined as unknown as Parameters<typeof verifyProof>[0])).toBe(false)
+    })
+
+    it('returns false when signature is not a string', () => {
+      const proof = createBlindProof(root, child)
+      const tampered = { ...proof, signature: 12345 as unknown as string }
+      expect(verifyProof(tampered)).toBe(false)
+    })
+
+    it('returns false when purpose is present as non-string (JSON null)', () => {
+      const proof = createFullProof(root, child)
+      const tampered = { ...proof, purpose: null as unknown as string }
+      expect(verifyProof(tampered)).toBe(false)
+    })
+
+    it('returns false when index is present as non-number', () => {
+      const proof = createFullProof(root, child)
+      const tampered = { ...proof, index: '0' as unknown as number }
+      expect(verifyProof(tampered)).toBe(false)
+    })
+  })
+
+  describe('purpose reserved characters (security fix)', () => {
+    // Build an Identity with a purpose containing a reserved character by
+    // bypassing derive() (which validates purposes at derivation time with
+    // the permissive base validator). The secret owner can do this locally;
+    // the test is to confirm the proof layer rejects it.
+    function buildIdentityWithPurpose(purpose: string): Identity {
+      const rootSecret = getSecret(root)
+      const { privateKey, publicKey, actualIndex } = deriveChildKey(rootSecret, 'social', 0)
+      return {
+        nsec: encodeNsec(privateKey),
+        npub: encodeNpub(publicKey),
+        privateKey,
+        publicKey,
+        purpose,
+        index: actualIndex,
+      }
+    }
+
+    it('createFullProof rejects purposes containing pipe', () => {
+      const bad = buildIdentityWithPurpose('foo|bar')
+      expect(() => createFullProof(root, bad)).toThrow(NsecTreeError)
+      expect(() => createFullProof(root, bad)).toThrow('"|"')
+    })
+
+    it('createFullProof rejects purposes containing newline', () => {
+      const bad = buildIdentityWithPurpose('foo\nbar')
+      expect(() => createFullProof(root, bad)).toThrow('control characters')
+    })
+
+    it('createFullProof rejects purposes containing tab', () => {
+      const bad = buildIdentityWithPurpose('foo\tbar')
+      expect(() => createFullProof(root, bad)).toThrow(NsecTreeError)
+    })
+
+    it('verifyProof rejects a forged proof with pipe in purpose field', () => {
+      const proof = createFullProof(root, child)
+      const tampered = { ...proof, purpose: 'social|injected' }
+      expect(verifyProof(tampered)).toBe(false)
+    })
+
+    it('verifyProof rejects a proof with control chars in purpose field', () => {
+      const proof = createFullProof(root, child)
+      const tampered = { ...proof, purpose: 'social\nmalicious' }
+      expect(verifyProof(tampered)).toBe(false)
     })
   })
 })
