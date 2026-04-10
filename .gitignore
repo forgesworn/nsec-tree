@@ -7,6 +7,12 @@ dist/
 *.pem
 *.key
 *.nsec
+*.mnemonic
+*.seed
+credentials.json
+secrets.json
+id_rsa*
+id_ed25519*
 coverage/
 docs/superpowers/
 
