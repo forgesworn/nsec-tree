@@ -1,3 +1,17 @@
+# [1.5.0](https://github.com/forgesworn/nsec-tree/compare/v1.4.4...v1.5.0) (2026-04-11)
+
+
+### Changed
+
+* migrate release tooling from `semantic-release` to [`forgesworn/release-action`](https://github.com/forgesworn/release-action). Removes hundreds of transitive devDependencies, eliminates bundled-npm Dependabot noise (handlebars, lodash, picomatch, brace-expansion), and preserves OIDC trusted publishing with provenance. No runtime or API changes for consumers.
+
+
+### Why
+
+`semantic-release`'s bundled `npm` CLI emits chronic Dependabot advisories that do not affect published artefacts, and its transitive dependency graph is large enough to conflict with the supply-chain posture a cryptography library should hold itself to. The replacement is a pure-bash release tool with hard pre-publish gates: tag-match against `package.json`, frozen-vector check, exports-map sanity, secret scan over packable artefacts, and runtime-only `npm audit`. Zero Node tooling inside the release action itself.
+
+`nsec-tree` is the pilot consumer; the action is intended for org-wide rollout once it has shipped at least one release end to end.
+
 ## [1.4.4](https://github.com/forgesworn/nsec-tree/compare/v1.4.3...v1.4.4) (2026-04-10)
 
 
