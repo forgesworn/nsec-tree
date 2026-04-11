@@ -12,7 +12,7 @@ npm install nsec-tree
 
 ESM-only. Zero custom crypto — all primitives from @noble/@scure.
 
-**Discuss:** [NIP draft](docs/NIP-XXXX.md) · [FAQ](docs/faq.md) · **Nostr:** [`npub1mgvlrnf5hm9yf0n5mf9nqmvarhvxkc6remu5ec3vf8r0txqkuk7su0e7q2`](https://njump.me/npub1mgvlrnf5hm9yf0n5mf9nqmvarhvxkc6remu5ec3vf8r0txqkuk7su0e7q2)
+**Discuss:** [NIP-IDENTITY-TREES draft](https://github.com/forgesworn/nip-drafts/blob/main/nips/NIP-IDENTITY-TREES.md) · [FAQ](docs/faq.md) · **Nostr:** [`npub1mgvlrnf5hm9yf0n5mf9nqmvarhvxkc6remu5ec3vf8r0txqkuk7su0e7q2`](https://njump.me/npub1mgvlrnf5hm9yf0n5mf9nqmvarhvxkc6remu5ec3vf8r0txqkuk7su0e7q2)
 
 ## Why nsec-tree?
 
@@ -341,7 +341,7 @@ Run any example: `npx tsx examples/<name>.ts`
 
 - [FAQ](docs/faq.md) — common questions and objections
 - [Comparison](docs/comparison.md) — nsec-tree vs NIP-06, NIP-26, linked subkeys
-- [NIP draft](docs/NIP-XXXX.md) — formal specification in NIP format
+- [NIP-IDENTITY-TREES](https://github.com/forgesworn/nip-drafts/blob/main/nips/NIP-IDENTITY-TREES.md) — formal NIP specification (published in forgesworn/nip-drafts)
 - [PROTOCOL.md](PROTOCOL.md) — full derivation spec with test vectors
 
 ---

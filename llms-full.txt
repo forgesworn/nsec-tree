@@ -250,5 +250,5 @@ Signed with BIP-340 Schnorr using the tree root secret.
 - [PROTOCOL.md](https://github.com/forgesworn/nsec-tree/blob/main/PROTOCOL.md): Full derivation specification with byte-level format and 5 frozen test vectors
 - [docs/faq.md](https://github.com/forgesworn/nsec-tree/blob/main/docs/faq.md): Common questions and objections
 - [docs/comparison.md](https://github.com/forgesworn/nsec-tree/blob/main/docs/comparison.md): Detailed comparison with NIP-06, NIP-26, linked subkeys
-- [docs/NIP-XXXX.md](https://github.com/forgesworn/nsec-tree/blob/main/docs/NIP-XXXX.md): Formal NIP draft specification
+- [NIP-IDENTITY-TREES](https://github.com/forgesworn/nip-drafts/blob/main/nips/NIP-IDENTITY-TREES.md): Formal NIP draft specification (published in forgesworn/nip-drafts)
 - [README.md](https://github.com/forgesworn/nsec-tree/blob/main/README.md): Quick start, API reference, security model
