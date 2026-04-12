@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/forgesworn/nsec-tree/compare/v1.5.0...v1.5.1) (2026-04-13)
+
+
+### Bug Fixes
+
+* **deps:** bump @scure/base to 2.0.0 ([#13](https://github.com/forgesworn/nsec-tree/pull/13)) — ESM-only release, Node 20.19+ required. Runtime dep; bech32 API unchanged.
+
 # [1.5.0](https://github.com/forgesworn/nsec-tree/compare/v1.4.4...v1.5.0) (2026-04-11)
 
 
