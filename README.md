@@ -379,7 +379,8 @@ MIT
 
 ---
 
-If you find nsec-tree useful, consider sending a tip:
+If you find nsec-tree useful, consider supporting development:
 
+- **GitHub Sponsors:** [TheCryptoDonkey](https://github.com/sponsors/TheCryptoDonkey)
 - **Lightning:** `thedonkey@strike.me`
 - **Nostr zaps:** `npub1mgvlrnf5hm9yf0n5mf9nqmvarhvxkc6remu5ec3vf8r0txqkuk7su0e7q2`
