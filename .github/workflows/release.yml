@@ -10,6 +10,6 @@ permissions:
 
 jobs:
   release:
-    uses: forgesworn/release-action/.github/workflows/release.yml@v0
+    uses: forgesworn/anvil/.github/workflows/release.yml@v0
     with:
       vector-test-command: npm run test:vectors
