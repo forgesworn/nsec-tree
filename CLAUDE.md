@@ -12,7 +12,8 @@ Deterministic Nostr sub-identity derivation library.
 
 - **British English** everywhere.
 - **Git:** `type: description` commits. No Co-Authored-By lines.
-- **Branch:** Work on branches, merge to main only when complete (semantic-release auto-publishes).
+- **Branch:** Work on branches, merge to main only when complete.
+- **Release:** Manual via `gh release create vX.Y.Z` on main. `release.yml` calls `forgesworn/anvil@v0` which runs the pre-publish gates and publishes to npm via OIDC. No auto-release on push.
 - **TDD:** Write failing test, implement, verify, commit.
 
 ## Architecture
