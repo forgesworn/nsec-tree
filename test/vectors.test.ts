@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { fromNsec, fromMnemonic, derive } from '../src/index.js'
+import { derivePersona } from '../src/persona.js'
 import { hexToBytes } from '../src/encoding.js'
 
 /**
@@ -52,5 +53,20 @@ describe('frozen test vectors', () => {
     expect(mnemonicRoot.masterPubkey).not.toBe(nsecRoot.masterPubkey)
     mnemonicRoot.destroy()
     nsecRoot.destroy()
+  })
+
+  it('vector 6: mnemonic root, persona=social (purpose nostr:persona:social), index=0', () => {
+    const root = fromMnemonic(
+      'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+    )
+    const persona = derivePersona(root, 'social')
+    expect(persona.identity.npub).toBe('npub1qdztfxg9z46k8qg4707n747y9rt7kl3f954lju2pneesmc3ypf2q83gm0e')
+    expect(persona.identity.nsec).toBe('nsec1dlvcyslke58xf6h3l78h8jj2gh7d50ksjrejgfvryh0d0zzzsk7q3j90f2')
+    // A persona is exactly the child at purpose `nostr:persona:<name>` (§3.1) —
+    // and distinct from the raw purpose `social` (vector 1/4).
+    const raw = derive(root, 'nostr:persona:social', 0)
+    expect(raw.npub).toBe(persona.identity.npub)
+    expect(derive(root, 'social', 0).npub).not.toBe(persona.identity.npub)
+    root.destroy()
   })
 })
