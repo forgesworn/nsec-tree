@@ -3,7 +3,7 @@ nsec-tree Derivation Protocol
 
 Deterministic Nostr sub-identity derivation via HMAC-SHA256.
 
-`v1.0` `stable`
+`v1.1` `stable`
 
 ## Abstract
 
@@ -151,6 +151,32 @@ Purpose strings MUST satisfy all of the following:
 
 Recommended format: lowercase, colon-separated namespaces
 (e.g. `"social"`, `"commerce"`, `"trott:rider"`, `"402:api:v2:prod"`).
+
+### 3.1 Reserved Purpose: Personas
+
+A **persona** is an application-level convenience over child derivation: a
+human-named, top-level identity meant to be used directly (posting, signing,
+messaging) rather than as an intermediate node. A persona named `<name>` is the
+child identity derived at the purpose string:
+
+```
+nostr:persona:<name>
+```
+
+with the index and curve-order handling of any other child (§2, §4). For
+example, persona `social` is purpose `nostr:persona:social`; persona
+`natural-person` is purpose `nostr:persona:natural-person`.
+
+The complete `nostr:persona:<name>` string is the purpose that is hashed, so
+`<name>` MUST be chosen such that the whole string still satisfies §3. Any
+implementation that exposes a dedicated "persona" operation MUST construct this
+exact purpose string — so a persona derived in one tool reproduces byte-for-byte
+in every other.
+
+`nostr:persona:` is the ONLY purpose namespace reserved by this specification.
+Every other purpose string is raw and application-defined. In particular, the
+raw purpose `social` and the persona `nostr:persona:social` are **different
+identities** and MUST NOT be conflated.
 
 ## 4. Curve Order Handling
 
@@ -392,6 +418,39 @@ master_npub  = npub1fezyufqcfk9nqwamc6n6fwtm3yr2hrj8tc5xf0t3qs75tqvkz2hq40tnpd
 The two master pubkeys differ, confirming that mnemonic-path and nsec-path
 derivations are independent.
 
+### 6.6 Vector 6 — mnemonic root, persona "social" (purpose "nostr:persona:social"), index 0
+
+Pins the reserved persona namespace (§3.1): a persona is nothing more than a
+child derived at `nostr:persona:<name>`, so this vector also confirms the
+`derivePersona` convenience reduces to the child algorithm of §2.
+
+**Input:**
+
+```
+mnemonic:    "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+passphrase:  (none)
+persona:     "social"
+purpose:     "nostr:persona:social"
+index:       0
+```
+
+**Tree root:** Same as Vector 4 (same mnemonic, mnemonic path):
+
+```
+tree_root    = cc92d213b5eccd19eb85c12c2cf6fd168f27c2cc347c51a7c4c62ac67795fc65
+master_npub  = npub186c5ke7vjsk98z8qx4ctdrggsl2qlu627g6xvg6yumrj5c5c6etqcfaclx
+```
+
+**Child derivation:**
+
+```
+child_priv   = 6fd98243f6cd0e64eaf1ff8f73ca4a45fcda3ed090f324258325ded7884285bc
+child_pub    = 0344b499051575638115f3fd3f57c428d7eb7e292d2bf971419e730de2240a54
+child_nsec   = nsec1dlvcyslke58xf6h3l78h8jj2gh7d50ksjrejgfvryh0d0zzzsk7q3j90f2
+child_npub   = npub1qdztfxg9z46k8qg4707n747y9rt7kl3f954lju2pneesmc3ypf2q83gm0e
+actual_index = 0
+```
+
 ## 7. Security Considerations
 
 ### One-way derivation
@@ -454,13 +513,18 @@ Source: https://github.com/forgesworn/nsec-tree
 
 ## Versioning
 
-This document is versioned as `v1.0`. The version covers:
+This document is versioned as `v1.1`. The version covers:
 - Tree root derivation (mnemonic path and nsec path)
 - Child key derivation (HMAC message format)
 - Purpose string validation rules
+- Reserved purpose namespaces (personas, §3.1)
 - Linkage proof attestation formats
 - Test vectors
 
 Changes to any of the above require a version bump. Additions (new proof types,
 new entry points) that do not alter existing derivation outputs MAY be added
 without a version bump.
+
+`v1.1` added the reserved `nostr:persona:` namespace (§3.1) and Vector 6. This
+is purely additive — it names an existing raw-purpose derivation and changes no
+prior output — so any `v1.0` implementation remains conformant.
