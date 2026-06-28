@@ -6,7 +6,7 @@ NIP-26 required every relay to validate delegation tags and every client to pars
 
 ### "NIP-06 already gives you multiple keys"
 
-NIP-06 defines mnemonic-to-key derivation and allows incrementing the account index for additional keys. nsec-tree builds on this foundation (using NIP-06's coin type 1237') but adds three things NIP-06 does not specify: human-readable purpose tags for semantic derivation, a standardised recovery scanning mechanism, and optional BIP-340 linkage proofs for selective disclosure. They are complementary.
+NIP-06 defines mnemonic-to-key derivation and allows incrementing the account index for additional keys. In practice NIP-06 itself now carries an "unrecommended — prefer a single nsec" note, precisely because incrementing an account index yields unlabelled keys with no recovery or privacy story. nsec-tree builds on the same foundation (using NIP-06's coin type 1237') but adds the three things NIP-06 does not specify: human-readable purpose tags for semantic derivation, a standardised recovery scanning mechanism, and optional BIP-340 linkage proofs for selective disclosure. They are complementary.
 
 ### "This adds key management complexity"
 

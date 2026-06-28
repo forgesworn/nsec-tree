@@ -1,6 +1,6 @@
 # nsec-tree
 
-> Nostr developers managing multiple identities need deterministic key derivation, but NIP-06 only derives a single key from a mnemonic. nsec-tree derives unlimited unlinkable sub-identities from one master secret, with optional linkage proofs for selective disclosure and NIP-78 event publishing.
+> Nostr developers managing multiple identities need deterministic key derivation, but NIP-06 — now marked "unrecommended" — only standardises one primary key per mnemonic. nsec-tree derives unlimited unlinkable sub-identities from one master secret, with optional linkage proofs for selective disclosure and NIP-78 event publishing.
 
 nsec-tree is for Nostr application developers who need per-purpose or per-context identities — social, commerce, fleet management, throwaway — all recoverable from a single mnemonic or existing nsec. Unlike random key generation, every identity is deterministic and recoverable. Unlike BIP-32 public derivation, child identities are unlinkable by default.
 
