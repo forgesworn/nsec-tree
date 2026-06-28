@@ -49,4 +49,4 @@ Deterministic Nostr sub-identity derivation library.
 
 ## Design spec
 
-`trott-business/docs/plans/2026-03-18-nsec-tree-design.md`
+`PROTOCOL.md` — the canonical, versioned derivation specification with frozen test vectors.
