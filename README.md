@@ -16,8 +16,9 @@ ESM-only. Zero custom crypto — all primitives from @noble/@scure.
 
 ## Why nsec-tree?
 
-NIP-06 standardises mnemonic-based key derivation, but most clients surface one
-primary key. nsec-tree gives you a purpose-tagged identity tree.
+NIP-06 standardises mnemonic-based key derivation but is now marked
+"unrecommended" in favour of a single nsec, and most clients surface one
+primary key regardless. nsec-tree gives you a purpose-tagged identity tree.
 
 - **Unlinkable by default** — no observer can prove two child npubs share a master
 - **Recoverable** — 12 words recreate your entire identity tree

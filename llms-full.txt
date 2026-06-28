@@ -2,7 +2,7 @@
 
 > Deterministic Nostr sub-identity derivation from a single master secret. One mnemonic or nsec, unlimited unlinkable identities, optional BIP-340 Schnorr linkage proofs.
 
-nsec-tree is a TypeScript library for Nostr developers who need per-purpose or per-context identities — social, commerce, fleet management, throwaway — all recoverable from a single backup. Unlike NIP-06 (which derives one key), nsec-tree derives an unlimited tree of purpose-tagged identities. Unlike BIP-32 public derivation, child identities are unlinkable by default.
+nsec-tree is a TypeScript library for Nostr developers who need per-purpose or per-context identities — social, commerce, fleet management, throwaway — all recoverable from a single backup. Unlike NIP-06 (which is now "unrecommended" and surfaces one primary key), nsec-tree derives an unlimited tree of purpose-tagged identities. Unlike BIP-32 public derivation, child identities are unlinkable by default.
 
 Zero custom crypto. All primitives from audited @noble/@scure libraries (HMAC-SHA256, BIP-32, BIP-340 Schnorr).
 
