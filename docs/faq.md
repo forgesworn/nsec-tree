@@ -34,7 +34,7 @@ Linkage proofs are opt-in and can only be created by the key owner (they require
 
 ### "Who uses this in production?"
 
-The TROTT protocol (decentralised ride-hailing) uses nsec-tree for per-role rider/driver identities. The L402/toll-booth ecosystem uses it for per-service signing identities across API gateways. Canary Kit uses it for duress-resistant verification hierarchies. These are production systems, not experiments. See https://github.com/forgesworn for the public repositories.
+The TROTT protocol (decentralised ride-hailing) uses nsec-tree for per-role rider/driver identities. The L402/toll-booth ecosystem uses it for per-service signing identities across API gateways. Canary Kit uses it for isolated per-context verification identities. These are production systems, not experiments. See https://github.com/forgesworn for the public repositories.
 
 ### "Why should I trust your crypto?"
 
