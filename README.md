@@ -1,5 +1,10 @@
 # nsec-tree
 
+> **Alpha:** ForgeSworn Recovery Words v1 is available in
+> `1.6.0-alpha.1` for integration testing. Its automated cross-language vectors
+> pass, but the full Heartwood hardware recovery ceremony has not run. Use test
+> keys and keep an independent backup.
+
 > Deterministic Nostr identity hierarchies. One master secret, unlimited identities.
 
 [![CI](https://github.com/forgesworn/nsec-tree/actions/workflows/ci.yml/badge.svg)](https://github.com/forgesworn/nsec-tree/actions/workflows/ci.yml)
@@ -21,7 +26,7 @@ NIP-06 standardises mnemonic-based key derivation but is now marked
 primary key regardless. nsec-tree gives you a purpose-tagged identity tree.
 
 - **Unlinkable by default** — no observer can prove two child npubs share a master
-- **Recoverable** — 12 words recreate your entire identity tree
+- **Self-describing recovery** — 19 typed words carry a 12-word payload plus the exact derivation and a public fingerprint
 - **Purpose-tagged** — human-readable derivation (`"social"`, `"commerce"`, `"trott:rider"`)
 - **Composable hierarchies** — model trees like `work -> company:a -> signing`
 
@@ -63,6 +68,23 @@ import { fromNsec, derive } from 'nsec-tree/core' // no BIP deps
 const root = fromNsec('nsec1...')
 const throwaway = derive(root, 'throwaway', 42)
 ```
+
+### Make self-describing recovery words
+
+```typescript
+import {
+  createMnemonicRecoveryWords,
+  restoreRecoveryWords,
+} from 'nsec-tree/recovery'
+
+const words = createMnemonicRecoveryWords('abandon abandon ... about')
+// The complete 19-word sequence is not valid bare BIP-39.
+const restored = restoreRecoveryWords(words)
+if (restored.type === 'tree-root') restored.root.destroy()
+```
+
+Raw nsecs use 31 words and explicitly embed either exact-key or nsec-tree-v1
+meaning. Bare BIP-39 remains an explicit legacy input. See [`RECOVERY.md`](RECOVERY.md).
 
 ### Build a hierarchy
 
@@ -133,6 +155,13 @@ Scan multiple purposes and indices, returning `Map<string, Identity[]>`. Default
 
 Zero the private key bytes of a derived identity.
 
+### Recovery words
+
+`createMnemonicRecoveryWords` and `createNsecRecoveryWords` create typed v1
+sequences. `restoreRecoveryWords` validates type, checksums, scalar, and public
+fingerprint before returning a key. `recoveryWordsToBytes` /
+`recoveryWordsFromBytes` provide the compact form used with typed Shamir v3.
+
 ### `createBlindProof(root, child)`
 
 BIP-340 Schnorr proof that the master owns a child — without revealing the derivation slot.
@@ -165,6 +194,7 @@ Extract a `LinkageProof` from a NIP-78 event's tags. Pass the result to `verifyP
 | `nsec-tree/proof` | Linkage proofs | No |
 | `nsec-tree/persona` | Persona derivation, two-level hierarchy, recovery | No |
 | `nsec-tree/event` | NIP-78 event conversion (toUnsignedEvent, fromEvent) | No |
+| `nsec-tree/recovery` | Typed recovery creation, compacting, and restore | Yes |
 | `nsec-tree/encoding` | NIP-19 bech32 helpers (encodeNsec, decodeNsec, encodeNpub, decodeNpub) | No |
 
 Use `nsec-tree/core` if you only need nsec-based derivation — it avoids pulling in BIP-32/39 dependencies.

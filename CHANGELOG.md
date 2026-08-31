@@ -1,3 +1,18 @@
+## [1.6.0-alpha.1](https://github.com/forgesworn/nsec-tree/compare/v1.5.1...v1.6.0-alpha.1) (2026-08-31)
+
+### Added
+
+* add ForgeSworn Recovery Words v1: a typed, versioned envelope around
+  canonical BIP-39 payloads with explicit recovery semantics, checksum, public
+  fingerprint verification, compact byte conversion, and a dedicated
+  `nsec-tree/recovery` export.
+
+### Alpha status
+
+* automated TypeScript/Rust vectors and cross-repository recovery tests pass;
+  the complete write-down, wipe, and restore ceremony has not yet run on
+  Heartwood hardware. Use test keys only and retain an independent backup.
+
 ## [1.5.1](https://github.com/forgesworn/nsec-tree/compare/v1.5.0...v1.5.1) (2026-04-13)
 
 

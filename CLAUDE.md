@@ -28,6 +28,7 @@ Deterministic Nostr sub-identity derivation library.
 - `src/proof.ts` — BIP-340 Schnorr linkage proofs
 - `src/persona.ts` — named persona derivation, two-level hierarchy
 - `src/event.ts` — NIP-78 Kind 30078 event conversion (toUnsignedEvent/fromEvent)
+- `src/recovery-words.ts` — typed/versioned recovery words and fail-closed fingerprint verification
 
 ## Subpath exports
 
@@ -37,6 +38,7 @@ Deterministic Nostr sub-identity derivation library.
 - `nsec-tree/proof` — linkage proofs only
 - `nsec-tree/persona` — persona derivation, two-level hierarchy, recovery
 - `nsec-tree/event` — NIP-78 event conversion (toUnsignedEvent, fromEvent, constants)
+- `nsec-tree/recovery` — ForgeSworn recovery-word creation, decoding, and restore
 - `nsec-tree/encoding` — NIP-19 bech32 helpers (encodeNsec, decodeNsec, encodeNpub, decodeNpub)
 
 ## Gotchas
@@ -50,3 +52,5 @@ Deterministic Nostr sub-identity derivation library.
 ## Design spec
 
 `PROTOCOL.md` — the canonical, versioned derivation specification with frozen test vectors.
+
+`RECOVERY.md` — the canonical typed recovery-word envelope with frozen cross-language vectors.
