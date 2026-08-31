@@ -28,6 +28,7 @@ src/
   proof.ts            -- BIP-340 Schnorr linkage proofs (blind + full)
   persona.ts          -- named persona derivation, two-level hierarchy, recovery
   event.ts            -- NIP-78 Kind 30078 event conversion (toUnsignedEvent, fromEvent)
+  recovery-words.ts   -- typed/versioned human recovery envelope + fingerprint verification
   index.ts            -- full API barrel re-export
   core.ts             -- no-BIP-deps barrel (must never import root-mnemonic.ts)
   mnemonic.ts         -- fromMnemonic-only barrel
@@ -45,15 +46,21 @@ src/
 - `nsec-tree/proof` -- linkage proofs only
 - `nsec-tree/persona` -- persona derivation, hierarchy, recovery
 - `nsec-tree/event` -- NIP-78 event conversion
+- `nsec-tree/recovery` -- ForgeSworn recovery-word creation, decoding, and restore
 - `nsec-tree/encoding` -- NIP-19 bech32 helpers
 
 ## Conventions
 
 - **British English** -- colour, initialise, behaviour, licence, zeroise
 - **Git commits:** `type: description` (feat:, fix:, test:, docs:, chore:). No Co-Authored-By lines.
-- **Branching:** Work on branches, merge to main only when complete. semantic-release auto-publishes on push to main.
+- **Branching:** Work on branches and merge to main only when complete.
+- **Release:** Bump the version and changelog manually, then create a GitHub
+  Release for the matching tag. `forgesworn/anvil` runs the gates and publishes
+  through npm OIDC. Prereleases must set `publishConfig.tag` so they cannot move
+  npm's `latest` tag.
 - **TDD:** Write failing test first, implement minimal code to pass, verify, commit.
 - **Frozen test vectors** in `test/vectors.test.ts` must never be modified -- they are canonical.
+- **Recovery vectors** in `test/recovery-words.test.ts` and `RECOVERY.md` are also frozen and cross-language.
 
 ## Crypto Dependencies
 
