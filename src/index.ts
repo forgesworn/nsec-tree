@@ -1,6 +1,7 @@
 export { fromNsec } from './root-nsec.js'
 export { fromMnemonic } from './root-mnemonic.js'
 export { derive, zeroise } from './derive.js'
+export { deriveRendezvous, RENDEZVOUS_PURPOSE } from './rendezvous.js'
 export { recover } from './recover.js'
 export { createBlindProof, createFullProof, verifyProof } from './proof.js'
 export type { TreeRoot, Identity, LinkageProof } from './types.js'

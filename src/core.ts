@@ -1,5 +1,6 @@
 export { fromNsec } from './root-nsec.js'
 export { derive, zeroise } from './derive.js'
+export { deriveRendezvous, RENDEZVOUS_PURPOSE } from './rendezvous.js'
 export { recover } from './recover.js'
 export type { TreeRoot, Identity } from './types.js'
 export { NsecTreeError, DEFAULT_SCAN_RANGE, MAX_SCAN_RANGE, MAX_INDEX } from './types.js'
