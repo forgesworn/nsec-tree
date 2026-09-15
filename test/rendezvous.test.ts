@@ -4,7 +4,7 @@ import { fromNsec } from '../src/root-nsec.js'
 import { deriveRendezvous, RENDEZVOUS_PURPOSE } from '../src/rendezvous.js'
 
 describe('deriveRendezvous', () => {
-  it('uses the sole Vennel root-child purpose and preserves the requested rotation index', () => {
+  it('uses the sole root-child purpose and preserves the requested rotation index', () => {
     const root = fromNsec(new Uint8Array(32).fill(0x61))
     const rendezvous = deriveRendezvous(root, 3)
     const generic = derive(root, 'rendezvous', 3)
