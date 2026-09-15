@@ -142,6 +142,14 @@ Create a `TreeRoot` from a bech32 nsec string or raw 32-byte key. An intermediat
 
 Derive a child `Identity` from a `TreeRoot`. Returns `{ nsec, npub, privateKey, publicKey, purpose, index }`. The index defaults to `0`.
 
+### `deriveRendezvous(root, index?)`
+
+Derive the Vennel `rendezvous` root child for a Link or quiet-drop pairing.
+It is deliberately derived from the `TreeRoot`, never an account identity or
+persona. Rotate it by incrementing `index`; provision the private half only by
+an authenticated private device flow, then call `zeroise()` on the temporary
+identity. This helper does not create a pairing link or export a private key.
+
 ### `deriveFromIdentity(identity, purpose, index?)`
 
 Derive a child `Identity` from any existing `Identity`, enabling arbitrary-depth
