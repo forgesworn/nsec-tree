@@ -1,7 +1,7 @@
 import { derive } from './derive.js'
 import type { Identity, TreeRoot } from './types.js'
 
-/** The sole root-child purpose used for a person's Vennel rendezvous key. */
+/** The sole root-child purpose used for a person's rendezvous key. */
 export const RENDEZVOUS_PURPOSE = 'rendezvous'
 
 /**

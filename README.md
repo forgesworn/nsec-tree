@@ -144,7 +144,7 @@ Derive a child `Identity` from a `TreeRoot`. Returns `{ nsec, npub, privateKey, 
 
 ### `deriveRendezvous(root, index?)`
 
-Derive the Vennel `rendezvous` root child for a Link or quiet-drop pairing.
+Derive the `rendezvous` root child for a supported pairing.
 It is deliberately derived from the `TreeRoot`, never an account identity or
 persona. Rotate it by incrementing `index`; provision the private half only by
 an authenticated private device flow, then call `zeroise()` on the temporary
