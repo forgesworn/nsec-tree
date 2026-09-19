@@ -173,10 +173,31 @@ implementation that exposes a dedicated "persona" operation MUST construct this
 exact purpose string — so a persona derived in one tool reproduces byte-for-byte
 in every other.
 
-`nostr:persona:` is the ONLY purpose namespace reserved by this specification.
+`nostr:persona:` and `signet:vault:` (§3.2) are reserved namespaces.
 Every other purpose string is raw and application-defined. In particular, the
 raw purpose `social` and the persona `nostr:persona:social` are **different
 identities** and MUST NOT be conflated.
+
+### 3.2 Signet private datasets
+
+`signet:vault:` is reserved for Signet private-state keys. Derive directly from
+the tree root using the complete raw purpose, never through persona derivation.
+The derivation algorithm and all existing identity keys remain unchanged.
+
+Purposes: `signet:vault:profiles`, `signet:vault:contacts:owner`,
+`signet:vault:contacts:dependant-N`, `signet:vault:contacts:bots`,
+`signet:vault:credentials`, and `signet:vault:settings`.
+
+`N` is the dependant's existing non-negative ordinal in canonical decimal (zero
+is `0`, no leading zeros). The derivation index is a rotation index: `0` is the
+initial key and higher indices are successive rotations. Rotation discovery is
+an application recovery contract, not a change to this derivation algorithm.
+These keys are not public personas and are not registered as typed identities.
+
+The additive fixture `test/fixtures/signet-vault-v1.json` records every purpose
+at indices 0 and 1, including dependants 0 and 1, from the public 0x01-fill test
+master. Existing frozen vectors are unchanged. New convention requires maintainer
+review before release.
 
 ## 4. Curve Order Handling
 
