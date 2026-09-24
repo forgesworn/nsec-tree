@@ -91,3 +91,16 @@ Key test files:
 - `test/persona.test.ts` -- persona derivation, hierarchy, recovery
 - `test/event.test.ts` -- NIP-78 event round-trip
 - `test/derive-identity.test.ts` -- arbitrary-depth hierarchy tests
+
+## Gotchas
+
+- `fromNsec()` applies an HMAC intermediate to derive the tree root: it is not the same as using the raw nsec bytes directly. The Rust counterpart (`heartwood-core::from_nsec_bytes()`) applies the same step; both sides must produce identical output.
+- `validateProofPurpose` additionally rejects `|` and control characters beyond the base purpose rules, to keep the pipe-delimited linkage-proof attestation format unambiguous.
+- Persona derivation is two-level: `derivePersona()` derives from the tree root, then persona children derive from the persona. Recovering a persona requires the tree root, not just the persona key.
+- Two proof forms: `createBlindProof()` proves two pubkeys share a root without revealing it; `createFullProof()` reveals the full derivation path. Choose based on privacy requirements.
+- String encodings (bech32) cannot be zeroed in JS: security-sensitive code should use raw byte arrays instead.
+
+## Design spec
+
+- `PROTOCOL.md` -- the canonical, versioned derivation specification with frozen test vectors.
+- `RECOVERY.md` -- the canonical typed recovery-word envelope with frozen cross-language vectors.
