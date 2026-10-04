@@ -26,7 +26,13 @@ Every user who has a shitposting alt already manages multiple identities manuall
 
 ### "HMAC derivation? Why not BIP-32?"
 
-BIP-32 public derivation has a known weakness: if an attacker obtains the parent extended public key and any single child private key, they can derive the parent private key. This is acceptable for Bitcoin wallets (where xpubs are guarded), but inappropriate for Nostr where child keys sign public events. HMAC-SHA256 derivation is strictly one-way — compromising a child key reveals nothing about the root or any sibling.
+nsec-tree does use BIP-32, once: a mnemonic becomes the tree root at `m/44'/1237'/727'/0'/0'`, hardened at every level. Below the root it uses HMAC-SHA256, and the reasons are practical rather than cryptographic.
+
+- **It starts from an existing nsec.** BIP-32 needs a seed and a chain code. A bare nsec has neither, so a BIP-32 tree cannot grow under a key someone already uses. An HMAC tree can.
+- **Purposes are strings, not indices.** BIP-32 child numbers are 31-bit integers, so a label such as `social` would have to be hashed down to an index. nsec-tree feeds the whole purpose (up to 255 bytes) into the derivation, alongside a 32-bit index.
+- **One primitive per step.** Each child is a single HMAC-SHA256, with no chain codes or extended keys, which is straightforward to reproduce on a microcontroller or in another language and to pin with cross-language test vectors.
+
+It is not a security upgrade over hardened BIP-32, which is itself an HMAC chain and equally one-way. The often-quoted BIP-32 weakness — an extended public key plus any one child private key reveals the parent — applies only to non-hardened derivation. In either scheme, compromising a child key reveals nothing about the root or its siblings.
 
 ### "Linkage proofs are a privacy risk"
 

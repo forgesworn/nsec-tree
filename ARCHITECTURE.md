@@ -101,7 +101,7 @@ Tree-shakeable entry points for minimal bundle size:
 
 ## Security model
 
-**Why HMAC-SHA256 instead of BIP-32?** In BIP-32, an extended public key plus any single child private key reveals the parent private key. In Nostr, child keys sign public events (observable). HMAC-SHA256 is strictly one-way: compromising a child reveals nothing about the root or siblings.
+**Why HMAC-SHA256 below the root instead of more BIP-32 levels?** Not for security: hardened BIP-32 derivation is itself an HMAC chain and would be equally one-way. The reasons are practical. A tree can grow from an existing nsec, which has no BIP-32 chain code. Children are named by a human-readable purpose string (up to 255 bytes) rather than a 31-bit index, so nothing is hashed down or lost. And each step is a single HMAC-SHA256, which is simple to reproduce in firmware and other languages. Compromising a child reveals nothing about the root or its siblings. Non-hardened BIP-32 would not give that: an extended public key plus any one child private key reveals the parent, which is why the mnemonic path to the root is hardened at every level.
 
 **Unlinkable by default.** Two child npubs are cryptographically indistinguishable from independent keys. No observer can prove they share a master without a linkage proof. Metadata correlation (timing, IP, content) remains an operational security concern.
 
