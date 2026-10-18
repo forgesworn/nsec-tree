@@ -10,16 +10,24 @@ ESM-only. Zero runtime dependencies beyond @noble/@scure.
 
 ## Getting Started
 
+> **Alpha:** ForgeSworn Recovery Words v1 is available in `1.6.0-alpha.1` for integration testing. Its automated cross-language vectors pass, but the full Heartwood hardware recovery ceremony has not run. Use test keys and keep an independent backup.
+
 ```bash
-npm install nsec-tree
+npm install nsec-tree          # the `latest` dist-tag
+npm install nsec-tree@alpha    # 1.6.0-alpha.1, needed for nsec-tree/recovery
 ```
+
+`npm install nsec-tree` resolves to the `latest` dist-tag. This repository's `package.json` is `1.6.0-alpha.1` with `publishConfig.tag` set to `alpha`, so the alpha does not move `latest`. The last stable release tag is `v1.5.1`, which has no `nsec-tree/recovery` subpath. `deriveRendezvous` landed on `main` after the `v1.6.0-alpha.1` tag, so it is in neither release.
+
+The mnemonic in the examples is the public BIP-39 test vector. Never use it for real keys. Every snippet below is self-contained.
 
 ### From a BIP-39 mnemonic (greenfield)
 
 ```typescript
 import { fromMnemonic, derive } from 'nsec-tree'
 
-const root = fromMnemonic('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
+const root = fromMnemonic(mnemonic)
 const social = derive(root, 'social')
 const commerce = derive(root, 'commerce')
 console.log(social.npub)   // npub1... (unlinkable from commerce)
@@ -32,22 +40,30 @@ root.destroy() // zero secret material
 ```typescript
 import { fromNsec, derive } from 'nsec-tree/core' // no BIP-32/39 deps
 
-const root = fromNsec('nsec1...')
+const nsec = process.env.NSEC // your existing bech32 nsec1... key
+if (!nsec) throw new Error('set NSEC to an existing nsec1... key')
+
+const root = fromNsec(nsec)
 const throwaway = derive(root, 'throwaway', 42)
+console.log(throwaway.npub)
 root.destroy()
 ```
 
 ### Build a hierarchy (arbitrary depth)
 
 ```typescript
-import { fromMnemonic, deriveFromIdentity } from 'nsec-tree'
+import { fromMnemonic, derive, deriveFromIdentity } from 'nsec-tree'
 
-const root = fromMnemonic('abandon abandon ... about')
+const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
+const root = fromMnemonic(mnemonic)
 const work = derive(root, 'work')
 const companyA = deriveFromIdentity(work, 'company:a')
 const payroll = deriveFromIdentity(companyA, 'payroll')
-// Path: master -> work -> company:a -> payroll
+console.log(payroll.npub) // Path: master -> work -> company:a -> payroll
+root.destroy()
 ```
+
+`deriveFromIdentity` is exported from `nsec-tree` only, not `nsec-tree/core`. Without BIP deps, use `derive(fromNsec(parent.privateKey), purpose)` from `nsec-tree/core`, which is exactly what it does internally. The `Uint8Array` input is not zeroed, so `parent` stays usable; call `destroy()` on the intermediate root afterwards.
 
 ### Persona derivation
 
@@ -55,63 +71,110 @@ const payroll = deriveFromIdentity(companyA, 'payroll')
 import { fromMnemonic } from 'nsec-tree'
 import { derivePersona, deriveFromPersona } from 'nsec-tree/persona'
 
-const root = fromMnemonic('abandon abandon ... about')
+const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
+const root = fromMnemonic(mnemonic)
 const personal = derivePersona(root, 'personal')
 const bitcoiner = derivePersona(root, 'bitcoiner')
 const meetup = deriveFromPersona(bitcoiner, 'canary:group:local-meetup')
 // Hierarchy: master -> bitcoiner -> canary:group:local-meetup
+console.log(personal.identity.npub, meetup.npub)
+root.destroy()
 ```
 
 ### Linkage proofs (selective disclosure)
 
 ```typescript
+import { fromMnemonic, derive } from 'nsec-tree'
 import { createBlindProof, verifyProof } from 'nsec-tree/proof'
 
-// Prove master owns child without revealing derivation slot
+const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
+const root = fromMnemonic(mnemonic)
+const child = derive(root, 'social')
+
+// Prove master owns child without revealing the derivation slot (purpose and index).
+// The proof still names the master and child public keys.
 const proof = createBlindProof(root, child)
 const valid = verifyProof(proof) // true
+root.destroy()
 ```
 
 ### Publish proof to Nostr (NIP-78)
 
 ```typescript
+import { fromMnemonic, derive } from 'nsec-tree'
+import { createBlindProof, verifyProof } from 'nsec-tree/proof'
 import { toUnsignedEvent, fromEvent } from 'nsec-tree/event'
 
+const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
+const root = fromMnemonic(mnemonic)
+const proof = createBlindProof(root, derive(root, 'social'))
+
 const unsigned = toUnsignedEvent(proof)
-// Sign with your Nostr library, then publish to relays
+// Sign with your Nostr library, then publish to relays. The signed event comes back
+// from your library; here the unsigned event stands in for it.
 
 // On the verifier side:
-const recovered = fromEvent(signedEvent)
-const isValid = verifyProof(recovered)
+const recovered = fromEvent(unsigned)
+const isValid = verifyProof(recovered) // true
+root.destroy()
 ```
 
 ### Recovery
 
 ```typescript
+import { fromMnemonic } from 'nsec-tree'
 import { recover } from 'nsec-tree/core'
 
+const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
+const root = fromMnemonic(mnemonic)
 const identities = recover(root, ['social', 'commerce', 'work'], 20)
 // Scans 20 indices per purpose, returns Map<string, Identity[]>
+console.log(identities.get('social')?.length) // 20
+root.destroy()
 ```
 
 ### Persona recovery
 
 ```typescript
+import { fromMnemonic } from 'nsec-tree'
 import { recoverPersonas, DEFAULT_PERSONA_NAMES } from 'nsec-tree/persona'
 
+const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
+const root = fromMnemonic(mnemonic)
 const recovered = recoverPersonas(root, DEFAULT_PERSONA_NAMES, 2)
 // Scans default names (personal, bitcoiner, work, social, anonymous) at 2 indices each
+const indexZeroOnly = recoverPersonas(root) // names default to DEFAULT_PERSONA_NAMES, scanRange defaults to 1
+console.log(recovered.size, indexZeroOnly.size) // 5 5
+root.destroy()
+```
+
+### Recovery words (`nsec-tree@alpha`)
+
+```typescript
+import { derive } from 'nsec-tree'
+import { createMnemonicRecoveryWords, restoreRecoveryWords } from 'nsec-tree/recovery'
+
+const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
+const words = createMnemonicRecoveryWords(mnemonic) // 19 typed words, not valid bare BIP-39
+const restored = restoreRecoveryWords(words)
+if (restored.type === 'tree-root') {
+  console.log(derive(restored.root, 'social').npub)
+  restored.root.destroy()
+} else {
+  restored.privateKey.fill(0) // 'raw-nsec': the caller owns and must zero the secret key bytes
+}
 ```
 
 ## Key Concepts
 
-- **TreeRoot** — opaque handle created from a mnemonic (`fromMnemonic`) or existing nsec (`fromNsec`). Holds the master secret. Call `destroy()` when done.
-- **Identity** — a derived child with `nsec`, `npub`, `privateKey`, `publicKey`, `purpose`, and `index`. Each is a fully independent secp256k1 keypair.
-- **Purpose string** — human-readable derivation tag (e.g. `"social"`, `"trott:rider"`, `"402:api:prod"`). Different purposes produce different, unlinkable keys. Case-sensitive, max 255 bytes, no null bytes.
-- **Persona** — a named identity derived using the convention `nostr:persona:{name}`. Supports two-level hierarchy: master -> persona -> group identity.
-- **Linkage proof** — BIP-340 Schnorr attestation that a master owns a child identity. Blind proofs hide the derivation slot; full proofs reveal it.
-- **NIP-78 events** — linkage proofs can be published to Nostr as Kind 30078 application-specific data.
-- **Recovery** — scan known purpose strings to re-derive all identities from the master secret. Deterministic: same input always produces same output.
+- **TreeRoot**: opaque handle created from a mnemonic (`fromMnemonic`) or existing nsec (`fromNsec`). Holds the master secret. Call `destroy()` when done.
+- **Identity**: a derived child with `nsec`, `npub`, `privateKey`, `publicKey`, `purpose`, and `index`. Each is a fully independent secp256k1 keypair. Field types are listed under Types.
+- **Purpose string**: human-readable derivation tag (e.g. `"social"`, `"trott:rider"`, `"402:api:prod"`). Different purposes produce different, unlinkable keys. Case-sensitive. Rules: a string, non-empty, not whitespace-only, no NUL, at most 255 UTF-8 bytes. A purpose used in a full linkage proof must also contain no `|` or control characters (C0 and DEL), because `|` delimits the attestation fields. Index: integer 0 to 4294967295.
+- **Persona**: a named identity derived using the convention `nostr:persona:{name}`. Names must be non-empty, not whitespace-only, with no `|` or control characters. Supports two-level hierarchy: master -> persona -> group identity.
+- **Linkage proof**: BIP-340 Schnorr attestation that a master owns a child identity. Both forms carry the master and child public keys. Blind proofs hide the derivation slot (purpose and index); full proofs reveal it. Neither reveals the root secret.
+- **NIP-78 events**: linkage proofs can be published to Nostr as Kind 30078 application-specific data.
+- **Recovery**: scan known purpose strings to re-derive all identities from the master secret. Deterministic: same input always produces same output. `scanRange` is an integer from 1 to 10,000, with at most 1,000 purposes or names per call.
+- **Errors**: validation failures throw `NsecTreeError` (extends `Error`, `name` is `'NsecTreeError'`), exported from `nsec-tree` and `nsec-tree/core`. `verifyProof` returns `false` for malformed proofs instead of throwing.
 
 ## API Reference
 
@@ -127,7 +190,8 @@ const recovered = recoverPersonas(root, DEFAULT_PERSONA_NAMES, 2)
 | Function | Subpath | Description |
 |----------|---------|-------------|
 | `derive(root, purpose, index?)` | `nsec-tree/core` | Derive a child Identity from a TreeRoot. Returns `{ nsec, npub, privateKey, publicKey, purpose, index }` |
-| `deriveFromIdentity(identity, purpose, index?)` | `nsec-tree` | Derive a child from any Identity, enabling arbitrary-depth hierarchies. Creates transient TreeRoot internally |
+| `deriveRendezvous(root, index?)` | `nsec-tree` and `nsec-tree/core` | Derive the root-only `rendezvous` child (purpose `RENDEZVOUS_PURPOSE`), never from a persona or account identity. On `main`, not in the published `1.6.0-alpha.1` |
+| `deriveFromIdentity(identity, purpose, index?)` | `nsec-tree` | Derive a child from any Identity, enabling arbitrary-depth hierarchies. Creates transient TreeRoot internally. Not in `nsec-tree/core` |
 | `recover(root, purposes, scanRange?)` | `nsec-tree/core` | Scan purposes x indices for recovery. Returns `Map<string, Identity[]>`. Default scanRange: 20 |
 | `zeroise(identity)` | `nsec-tree/core` | Zero the raw private key bytes of a derived identity |
 
@@ -137,13 +201,13 @@ const recovered = recoverPersonas(root, DEFAULT_PERSONA_NAMES, 2)
 |----------|---------|-------------|
 | `derivePersona(root, name, index?)` | `nsec-tree/persona` | Derive a named persona identity using purpose `nostr:persona:{name}` |
 | `deriveFromPersona(persona, purpose, index?)` | `nsec-tree/persona` | Derive sub-identity beneath a persona (two-level hierarchy) |
-| `recoverPersonas(root, names?, scanRange?)` | `nsec-tree/persona` | Recover personas by scanning known names. Defaults to `DEFAULT_PERSONA_NAMES` |
+| `recoverPersonas(root, names?, scanRange?)` | `nsec-tree/persona` | Recover personas by scanning known names. `names` defaults to `DEFAULT_PERSONA_NAMES`; `scanRange` defaults to 1 (index 0 only), unlike `recover`'s 20. Returns `Map<string, Persona[]>` |
 
 ### Linkage Proofs
 
 | Function | Subpath | Description |
 |----------|---------|-------------|
-| `createBlindProof(root, child)` | `nsec-tree/proof` | BIP-340 Schnorr proof that master owns child, without revealing derivation slot |
+| `createBlindProof(root, child)` | `nsec-tree/proof` | BIP-340 Schnorr proof that master owns child, without revealing derivation slot. The master and child public keys are in the proof |
 | `createFullProof(root, child)` | `nsec-tree/proof` | Like blind proof, but also reveals purpose and index |
 | `verifyProof(proof)` | `nsec-tree/proof` | Verify a LinkageProof. Returns boolean |
 
@@ -153,6 +217,17 @@ const recovered = recoverPersonas(root, DEFAULT_PERSONA_NAMES, 2)
 |----------|---------|-------------|
 | `toUnsignedEvent(proof)` | `nsec-tree/event` | Convert LinkageProof to unsigned Kind 30078 Nostr event |
 | `fromEvent(event)` | `nsec-tree/event` | Extract LinkageProof from a NIP-78 event's tags |
+
+### Recovery Words (`nsec-tree@alpha`)
+
+| Function | Subpath | Description |
+|----------|---------|-------------|
+| `createMnemonicRecoveryWords(mnemonic, passphrase?)` | `nsec-tree/recovery` | Wrap a BIP-39 mnemonic in typed words (19 for a 12-word mnemonic). The passphrase is never included, only a flag and a public fingerprint |
+| `createNsecRecoveryWords(nsec, mode)` | `nsec-tree/recovery` | Wrap a raw nsec (`string` or 32-byte `Uint8Array`). `mode` is `'raw'` (exact key) or `'tree'` (nsec-tree v1 root) |
+| `decodeRecoveryWords(words)` | `nsec-tree/recovery` | Decode and checksum without deriving a key. Returns `DecodedRecoveryWords`; its `payload` is secret and the caller must zero it |
+| `restoreRecoveryWords(words, passphrase?)` | `nsec-tree/recovery` | Validate type, checksums, scalar and public fingerprint, then return `RestoredRecovery` |
+| `recoveryWordsToBytes(words)` | `nsec-tree/recovery` | Pack typed words into a compact `Uint8Array` (the form used with typed Shamir v3) |
+| `recoveryWordsFromBytes(compact)` | `nsec-tree/recovery` | Unpack compact bytes into the typed word string |
 
 ### Encoding
 
@@ -167,37 +242,44 @@ const recovered = recoverPersonas(root, DEFAULT_PERSONA_NAMES, 2)
 
 | Export | Subpath | Value | Description |
 |--------|---------|-------|-------------|
-| `DEFAULT_SCAN_RANGE` | `nsec-tree` | 20 | Default recovery scan range (BIP-44 gap limit) |
-| `MAX_SCAN_RANGE` | `nsec-tree` | 10,000 | Maximum scan range (prevents self-DoS) |
-| `MAX_INDEX` | `nsec-tree` | 0xFFFFFFFF | Maximum derivation index (uint32) |
+| `DEFAULT_SCAN_RANGE` | `nsec-tree` and `nsec-tree/core` | 20 | Default recovery scan range (BIP-44 gap limit) |
+| `MAX_SCAN_RANGE` | `nsec-tree` and `nsec-tree/core` | 10,000 | Maximum scan range (prevents self-DoS) |
+| `MAX_INDEX` | `nsec-tree` and `nsec-tree/core` | 0xFFFFFFFF | Maximum derivation index (uint32) |
+| `RENDEZVOUS_PURPOSE` | `nsec-tree` and `nsec-tree/core` | `"rendezvous"` | Purpose used by `deriveRendezvous` |
 | `NSEC_TREE_EVENT_KIND` | `nsec-tree/event` | 30078 | NIP-78 application-specific data kind |
 | `NSEC_TREE_D_PREFIX` | `nsec-tree/event` | `"nsec-tree:"` | Namespace prefix for d-tags |
 | `DEFAULT_PERSONA_NAMES` | `nsec-tree/persona` | `['personal', 'bitcoiner', 'work', 'social', 'anonymous']` | Default names for persona recovery |
+| `RECOVERY_WORDS_VERSION` | `nsec-tree/recovery` | 1 | Version of the recovery-word envelope, not the derivation protocol |
+| `RECOVERY_HEADER_WORDS` | `nsec-tree/recovery` | 7 | Header words before the BIP-39 payload |
 
 ### Types
 
 | Type | Description |
 |------|-------------|
-| `TreeRoot` | Opaque handle. `masterPubkey: string`, `destroy(): void` |
-| `Identity` | `{ nsec, npub, privateKey, publicKey, purpose, index }` |
-| `LinkageProof` | `{ masterPubkey, childPubkey, purpose?, index?, attestation, signature }` |
+| `TreeRoot` | Opaque handle. `masterPubkey: string` (npub), `destroy(): void` |
+| `Identity` | `{ nsec: string, npub: string, privateKey: Uint8Array, publicKey: Uint8Array, purpose: string, index: number }`. `nsec` and `npub` are NIP-19 bech32; `privateKey` is the raw 32-byte scalar; `publicKey` is the raw 32-byte x-only (BIP-340) key; `index` is the index actually used |
+| `LinkageProof` | `{ masterPubkey: string, childPubkey: string, purpose?: string, index?: number, attestation: string, signature: string }`. The pubkeys are 64-char lowercase hex x-only keys; `signature` is 128-char lowercase hex; `purpose` and `index` are present only in full proofs |
 | `Persona` | `{ identity: Identity, name: string, index: number }` |
-| `UnsignedEvent` | `{ kind, pubkey, created_at, tags, content }` |
-| `NsecTreeError` | Custom error class for all nsec-tree operations |
+| `UnsignedEvent` | `{ kind: number, pubkey: string, created_at: number, tags: string[][], content: string }` |
+| `RestoredRecovery` | Either `{ type: 'tree-root', source: 'mnemonic' \| 'nsec', version: 1, fingerprint: string, root: TreeRoot }` or `{ type: 'raw-nsec', version: 1, fingerprint: string, npub: string, privateKey: Uint8Array }`. The caller must zero `privateKey` |
+| `DecodedRecoveryWords` | `{ version: 1, kind: RecoveryKind, passphraseRequired: boolean, fingerprint: string, payload: Uint8Array }`. The caller must zero `payload` |
+| `RecoveryKind` | `'nsec-tree-mnemonic-v1' \| 'raw-nsec-v1' \| 'nsec-tree-nsec-v1'` |
+| `NsecTreeError` | Error class (extends `Error`) thrown for all nsec-tree validation failures |
 
 ## Subpath Exports
 
 | Import | What | BIP-32/39 deps? |
 |--------|------|-----------------|
 | `nsec-tree` | Full API (all functions, types, constants) | Yes |
-| `nsec-tree/core` | fromNsec, derive, recover, zeroise | No |
+| `nsec-tree/core` | fromNsec, derive, deriveRendezvous, RENDEZVOUS_PURPOSE, recover, zeroise, NsecTreeError, DEFAULT_SCAN_RANGE, MAX_SCAN_RANGE, MAX_INDEX, TreeRoot and Identity types. Not deriveFromIdentity | No |
 | `nsec-tree/mnemonic` | fromMnemonic only | Yes |
 | `nsec-tree/proof` | createBlindProof, createFullProof, verifyProof | No |
-| `nsec-tree/persona` | derivePersona, deriveFromPersona, recoverPersonas, DEFAULT_PERSONA_NAMES | No |
-| `nsec-tree/event` | toUnsignedEvent, fromEvent, NSEC_TREE_EVENT_KIND, NSEC_TREE_D_PREFIX | No |
+| `nsec-tree/persona` | derivePersona, deriveFromPersona, recoverPersonas, DEFAULT_PERSONA_NAMES, Persona type | No |
+| `nsec-tree/event` | toUnsignedEvent, fromEvent, NSEC_TREE_EVENT_KIND, NSEC_TREE_D_PREFIX, UnsignedEvent type | No |
+| `nsec-tree/recovery` | createMnemonicRecoveryWords, createNsecRecoveryWords, decodeRecoveryWords, restoreRecoveryWords, recoveryWordsToBytes, recoveryWordsFromBytes, RECOVERY_WORDS_VERSION, RECOVERY_HEADER_WORDS (`nsec-tree@alpha`) | Yes |
 | `nsec-tree/encoding` | encodeNsec, decodeNsec, encodeNpub, decodeNpub | No |
 
-Use `nsec-tree/core` if you only need nsec-based derivation — avoids pulling in BIP-32/39 dependencies.
+Use `nsec-tree/core` if you only need nsec-based derivation. It avoids pulling in BIP-32/39 dependencies.
 
 ## Derivation Protocol
 

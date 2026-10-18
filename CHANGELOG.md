@@ -1,3 +1,11 @@
+## Unreleased
+
+### Added
+
+* add `deriveRendezvous(root, index?)` and `RENDEZVOUS_PURPOSE`, a root-only
+  `rendezvous` child exported from `nsec-tree` and `nsec-tree/core` (added after
+  the `v1.6.0-alpha.1` tag, so not yet in a published release).
+
 ## [1.6.0-alpha.1](https://github.com/forgesworn/nsec-tree/compare/v1.5.1...v1.6.0-alpha.1) (2026-08-31)
 
 ### Added
