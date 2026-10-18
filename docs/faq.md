@@ -36,7 +36,7 @@ It is not a security upgrade over hardened BIP-32, which is itself an HMAC chain
 
 ### "Linkage proofs are a privacy risk"
 
-Linkage proofs are opt-in and can only be created by the key owner (they require the root secret). No observer can force, forge, or infer a linkage proof. The default state is full unlinkability — two child keys are indistinguishable from two completely independent keys. Proofs exist for the cases where the owner actively wants to demonstrate a connection.
+Linkage proofs are opt-in and can only be created by the key owner (they require the root secret). No observer can force, forge, or infer a linkage proof. The default state is full unlinkability — two child keys are indistinguishable from two completely independent keys. Proofs exist for the cases where the owner actively wants to demonstrate a connection. A proof publishes the master and child public keys, so it permanently links those two keys; a blind proof only hides the purpose and index.
 
 ### "Who uses this in production?"
 

@@ -4,18 +4,26 @@
 
 nsec-tree is for Nostr application developers who need per-purpose or per-context identities — social, commerce, fleet management, throwaway — all recoverable from a single mnemonic or existing nsec. Unlike random key generation, every identity is deterministic and recoverable. Each identity is named by a readable purpose, and child identities are unlinkable by default.
 
+> **Alpha:** ForgeSworn Recovery Words v1 is available in `1.6.0-alpha.1` for integration testing. Its automated cross-language vectors pass, but the full Heartwood hardware recovery ceremony has not run. Use test keys and keep an independent backup.
+
 Zero custom crypto. All primitives from audited @noble/@scure libraries.
 
 ## Getting Started
 
 ```bash
-npm install nsec-tree
+npm install nsec-tree          # the `latest` dist-tag
+npm install nsec-tree@alpha    # 1.6.0-alpha.1, needed for nsec-tree/recovery
 ```
+
+`npm install nsec-tree` resolves to the `latest` dist-tag. This repository's `package.json` is `1.6.0-alpha.1` with `publishConfig.tag` set to `alpha`, so the alpha does not move `latest`. The last stable release tag is `v1.5.1`, which has no `nsec-tree/recovery` subpath. `deriveRendezvous` landed on `main` after the `v1.6.0-alpha.1` tag, so it is in neither release.
+
+The mnemonic below is the public BIP-39 test vector. Never use it for real keys.
 
 ```typescript
 import { fromMnemonic, derive } from 'nsec-tree'
 
-const root = fromMnemonic('your twelve word mnemonic phrase here ...')
+const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
+const root = fromMnemonic(mnemonic)
 const social = derive(root, 'social')        // purpose-tagged identity
 const commerce = derive(root, 'commerce')     // different, unlinkable
 console.log(social.npub)   // npub1...
@@ -25,38 +33,49 @@ root.destroy() // zero secret material
 
 ## Key Concepts
 
-- **TreeRoot** — opaque handle created from a mnemonic (`fromMnemonic`) or existing nsec (`fromNsec`). Holds the master secret. Call `destroy()` when done.
-- **Identity** — a derived child with `nsec`, `npub`, `privateKey`, `publicKey`, `purpose`, and `index`. Each is a fully independent secp256k1 keypair.
-- **Purpose string** — human-readable derivation tag (e.g. `"social"`, `"trott:rider"`, `"402:api:prod"`). Different purposes produce different, unlinkable keys.
-- **Persona** — a named identity derived using the convention `nostr:persona:{name}` (e.g. personal, bitcoiner, work). Supports two-level hierarchy: master -> persona -> group identity. Recoverable by scanning known persona names.
-- **Linkage proof** — BIP-340 Schnorr attestation that a master owns a child identity. Blind proofs hide the derivation slot; full proofs reveal it.
-- **NIP-78 events** — linkage proofs can be published to Nostr as Kind 30078 application-specific data, making key relationships discoverable on-protocol.
-- **Recovery** — scan known purpose strings to re-derive all identities from the master secret.
+- **TreeRoot**: opaque handle created from a mnemonic (`fromMnemonic`) or existing nsec (`fromNsec`). Holds the master secret. Exposes `masterPubkey: string` (npub) and `destroy(): void`; call `destroy()` when done.
+- **Identity**: a derived child, a fully independent secp256k1 keypair: `nsec: string` and `npub: string` (NIP-19 bech32), `privateKey: Uint8Array` (raw 32-byte scalar), `publicKey: Uint8Array` (raw 32-byte x-only BIP-340 key), `purpose: string`, and `index: number` (the index actually used, which can exceed the requested one in the ~2^-128 case of an invalid scalar).
+- **Purpose string**: human-readable derivation tag (e.g. `"social"`, `"trott:rider"`, `"402:api:prod"`). Different purposes produce different, unlinkable keys. Rules: a string, non-empty, not whitespace-only, no NUL, at most 255 UTF-8 bytes. A purpose used in a full linkage proof must also contain no `|` or control characters (C0 and DEL). Index: integer 0 to 4294967295.
+- **Persona**: `{ identity: Identity, name: string, index: number }`, derived using the purpose `nostr:persona:{name}` (e.g. personal, bitcoiner, work). Names must be non-empty, not whitespace-only, with no `|` or control characters. Supports two-level hierarchy: master -> persona -> group identity. Recoverable by scanning known persona names.
+- **Linkage proof**: `LinkageProof { masterPubkey, childPubkey, purpose?, index?, attestation, signature }`. The pubkeys are 64-char lowercase hex x-only keys, `attestation` is the signed UTF-8 string, `signature` is 128-char lowercase hex BIP-340 Schnorr. Blind proofs carry the master and child public keys but omit `purpose` and `index`, so they hide the derivation slot (not the master pubkey); full proofs include both.
+- **NIP-78 events**: linkage proofs can be published to Nostr as Kind 30078 application-specific data, making key relationships discoverable on-protocol.
+- **Recovery**: scan known purpose strings (`recover`, default scan range 20) or persona names (`recoverPersonas`, default scan range 1) to re-derive identities from the master secret. `scanRange` is an integer from 1 to 10,000.
+- **Recovery words** (`1.6.0-alpha.1`, `nsec-tree/recovery`): typed, versioned word sequences with a public fingerprint. `restoreRecoveryWords` returns `RestoredRecovery`: either `{ type: 'tree-root', source: 'mnemonic' | 'nsec', version: 1, fingerprint, root: TreeRoot }` or `{ type: 'raw-nsec', version: 1, fingerprint, npub, privateKey: Uint8Array }`, where the caller must zero `privateKey`. See RECOVERY.md.
+- **Errors**: validation failures throw `NsecTreeError` (extends `Error`, `name` is `'NsecTreeError'`), exported from `nsec-tree` and `nsec-tree/core`. `verifyProof` returns `false` for malformed proofs instead of throwing.
 
 ## API Surface
 
 | Function | Subpath | Description |
 |----------|---------|-------------|
 | `fromMnemonic(mnemonic, passphrase?)` | `nsec-tree` | Create TreeRoot from BIP-39 mnemonic |
-| `fromNsec(nsec)` | `nsec-tree/core` | Create TreeRoot from bech32 nsec or raw bytes |
+| `fromNsec(nsec)` | `nsec-tree/core` | Create TreeRoot from bech32 nsec or raw 32-byte key |
 | `derive(root, purpose, index?)` | `nsec-tree/core` | Derive a child Identity |
-| `deriveFromIdentity(identity, purpose, index?)` | `nsec-tree` | Derive child from any Identity (arbitrary-depth hierarchies) |
-| `recover(root, purposes, scanRange?)` | `nsec-tree/core` | Scan purposes x indices for recovery |
+| `deriveRendezvous(root, index?)` | `nsec-tree/core` | Derive the root-only `rendezvous` child (on `main`, not in the published `1.6.0-alpha.1`) |
+| `deriveFromIdentity(identity, purpose, index?)` | `nsec-tree` | Derive child from any Identity (arbitrary-depth hierarchies). Not in `nsec-tree/core` |
+| `recover(root, purposes, scanRange?)` | `nsec-tree/core` | Scan purposes x indices for recovery. Default scanRange 20 |
 | `zeroise(identity)` | `nsec-tree/core` | Zero the private key bytes |
 | `createBlindProof(root, child)` | `nsec-tree/proof` | Prove ownership without revealing derivation slot |
 | `createFullProof(root, child)` | `nsec-tree/proof` | Prove ownership with purpose and index |
 | `verifyProof(proof)` | `nsec-tree/proof` | Verify a LinkageProof |
 | `derivePersona(root, name, index?)` | `nsec-tree/persona` | Derive a named persona identity |
 | `deriveFromPersona(persona, purpose, index?)` | `nsec-tree/persona` | Derive sub-identity beneath a persona |
-| `recoverPersonas(root, names, scanRange?)` | `nsec-tree/persona` | Recover personas by scanning known names |
+| `recoverPersonas(root, names?, scanRange?)` | `nsec-tree/persona` | Recover personas by scanning known names. `names` defaults to `DEFAULT_PERSONA_NAMES`; `scanRange` defaults to 1 (index 0 only) |
 | `toUnsignedEvent(proof)` | `nsec-tree/event` | Convert LinkageProof to unsigned NIP-78 Kind 30078 event |
 | `fromEvent(event)` | `nsec-tree/event` | Extract LinkageProof from a NIP-78 event |
+| `createMnemonicRecoveryWords(mnemonic, passphrase?)` | `nsec-tree/recovery` | Wrap a BIP-39 mnemonic in typed recovery words (`1.6.0-alpha.1`) |
+| `createNsecRecoveryWords(nsec, mode)` | `nsec-tree/recovery` | Wrap a raw nsec; `mode` is `'raw'` (exact key) or `'tree'` (nsec-tree v1) |
+| `decodeRecoveryWords(words)` | `nsec-tree/recovery` | Decode and checksum without deriving a key; returns a secret `payload` to zero |
+| `restoreRecoveryWords(words, passphrase?)` | `nsec-tree/recovery` | Validate and restore; returns `RestoredRecovery` |
+| `recoveryWordsToBytes(words)` | `nsec-tree/recovery` | Pack typed words into a compact `Uint8Array` |
+| `recoveryWordsFromBytes(compact)` | `nsec-tree/recovery` | Unpack compact bytes into typed words |
 | `encodeNsec(bytes)` | `nsec-tree/encoding` | Encode raw bytes to bech32 nsec |
 | `decodeNsec(nsec)` | `nsec-tree/encoding` | Decode bech32 nsec to raw bytes |
 | `encodeNpub(bytes)` | `nsec-tree/encoding` | Encode raw bytes to bech32 npub |
 | `decodeNpub(npub)` | `nsec-tree/encoding` | Decode bech32 npub to raw bytes |
 
-Subpath exports for minimal dependencies: `nsec-tree/core` (no BIP-32/39), `nsec-tree/proof` (proofs only), `nsec-tree/mnemonic` (fromMnemonic only), `nsec-tree/persona` (persona hierarchy), `nsec-tree/event` (NIP-78 event conversion), `nsec-tree/encoding` (NIP-19 bech32 helpers).
+Subpath exports (BIP-32/39 dependencies only where noted): `nsec-tree` (full API, BIP deps), `nsec-tree/core` (fromNsec, derive, deriveRendezvous, RENDEZVOUS_PURPOSE, recover, zeroise, NsecTreeError, constants, TreeRoot and Identity types; no BIP deps; not deriveFromIdentity), `nsec-tree/mnemonic` (fromMnemonic only, BIP deps), `nsec-tree/proof` (proofs only), `nsec-tree/persona` (persona hierarchy), `nsec-tree/event` (NIP-78 event conversion), `nsec-tree/recovery` (typed recovery words, BIP deps, `nsec-tree@alpha`), `nsec-tree/encoding` (NIP-19 bech32 helpers).
+
+Without BIP deps, the equivalent of `deriveFromIdentity(parent, purpose)` is `derive(fromNsec(parent.privateKey), purpose)` from `nsec-tree/core`; call `destroy()` on the intermediate root afterwards. The `Uint8Array` input is not zeroed, so `parent` stays usable. `deriveFromPersona` in `nsec-tree/persona` does the same for personas.
 
 ## Optional
 
