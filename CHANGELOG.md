@@ -1,10 +1,18 @@
-## Unreleased
+## [1.6.0](https://github.com/forgesworn/nsec-tree/compare/v1.5.1...v1.6.0) (2026-10-19)
+
+Promotes `1.6.0-alpha.1` to `latest`, with the changes below. The ForgeSworn
+Recovery Words v1 format is still alpha: the Heartwood hardware recovery
+ceremony has not run. Use test keys and keep an independent backup.
 
 ### Added
 
 * add `deriveRendezvous(root, index?)` and `RENDEZVOUS_PURPOSE`, a root-only
-  `rendezvous` child exported from `nsec-tree` and `nsec-tree/core` (added after
-  the `v1.6.0-alpha.1` tag, so not yet in a published release).
+  `rendezvous` child exported from `nsec-tree` and `nsec-tree/core`.
+
+### Documentation
+
+* align the README, llms files and AGENTS.md with the source, and correct the
+  BIP-32 rationale.
 
 ## [1.6.0-alpha.1](https://github.com/forgesworn/nsec-tree/compare/v1.5.1...v1.6.0-alpha.1) (2026-08-31)
 

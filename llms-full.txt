@@ -10,14 +10,13 @@ ESM-only. Zero runtime dependencies beyond @noble/@scure.
 
 ## Getting Started
 
-> **Alpha:** ForgeSworn Recovery Words v1 is available in `1.6.0-alpha.1` for integration testing. Its automated cross-language vectors pass, but the full Heartwood hardware recovery ceremony has not run. Use test keys and keep an independent backup.
+> **Alpha:** ForgeSworn Recovery Words v1 (`nsec-tree/recovery`, from `1.6.0`) is for integration testing. Its automated cross-language vectors pass, but the full Heartwood hardware recovery ceremony has not run. Use test keys and keep an independent backup.
 
 ```bash
-npm install nsec-tree          # the `latest` dist-tag
-npm install nsec-tree@alpha    # 1.6.0-alpha.1, needed for nsec-tree/recovery
+npm install nsec-tree
 ```
 
-`npm install nsec-tree` resolves to the `latest` dist-tag. This repository's `package.json` is `1.6.0-alpha.1` with `publishConfig.tag` set to `alpha`, so the alpha does not move `latest`. The last stable release tag is `v1.5.1`, which has no `nsec-tree/recovery` subpath. `deriveRendezvous` landed on `main` after the `v1.6.0-alpha.1` tag, so it is in neither release.
+`nsec-tree/recovery` and `deriveRendezvous` need `1.6.0` or later; `1.5.1` and earlier have neither.
 
 The mnemonic in the examples is the public BIP-39 test vector. Never use it for real keys. Every snippet below is self-contained.
 
@@ -148,7 +147,7 @@ console.log(recovered.size, indexZeroOnly.size) // 5 5
 root.destroy()
 ```
 
-### Recovery words (`nsec-tree@alpha`)
+### Recovery words (from `1.6.0`)
 
 ```typescript
 import { derive } from 'nsec-tree'
@@ -190,7 +189,7 @@ if (restored.type === 'tree-root') {
 | Function | Subpath | Description |
 |----------|---------|-------------|
 | `derive(root, purpose, index?)` | `nsec-tree/core` | Derive a child Identity from a TreeRoot. Returns `{ nsec, npub, privateKey, publicKey, purpose, index }` |
-| `deriveRendezvous(root, index?)` | `nsec-tree` and `nsec-tree/core` | Derive the root-only `rendezvous` child (purpose `RENDEZVOUS_PURPOSE`), never from a persona or account identity. On `main`, not in the published `1.6.0-alpha.1` |
+| `deriveRendezvous(root, index?)` | `nsec-tree` and `nsec-tree/core` | Derive the root-only `rendezvous` child (purpose `RENDEZVOUS_PURPOSE`), never from a persona or account identity. From `1.6.0` |
 | `deriveFromIdentity(identity, purpose, index?)` | `nsec-tree` | Derive a child from any Identity, enabling arbitrary-depth hierarchies. Creates transient TreeRoot internally. Not in `nsec-tree/core` |
 | `recover(root, purposes, scanRange?)` | `nsec-tree/core` | Scan purposes x indices for recovery. Returns `Map<string, Identity[]>`. Default scanRange: 20 |
 | `zeroise(identity)` | `nsec-tree/core` | Zero the raw private key bytes of a derived identity |
@@ -218,7 +217,7 @@ if (restored.type === 'tree-root') {
 | `toUnsignedEvent(proof)` | `nsec-tree/event` | Convert LinkageProof to unsigned Kind 30078 Nostr event |
 | `fromEvent(event)` | `nsec-tree/event` | Extract LinkageProof from a NIP-78 event's tags |
 
-### Recovery Words (`nsec-tree@alpha`)
+### Recovery Words (from `1.6.0`)
 
 | Function | Subpath | Description |
 |----------|---------|-------------|
@@ -276,7 +275,7 @@ if (restored.type === 'tree-root') {
 | `nsec-tree/proof` | createBlindProof, createFullProof, verifyProof | No |
 | `nsec-tree/persona` | derivePersona, deriveFromPersona, recoverPersonas, DEFAULT_PERSONA_NAMES, Persona type | No |
 | `nsec-tree/event` | toUnsignedEvent, fromEvent, NSEC_TREE_EVENT_KIND, NSEC_TREE_D_PREFIX, UnsignedEvent type | No |
-| `nsec-tree/recovery` | createMnemonicRecoveryWords, createNsecRecoveryWords, decodeRecoveryWords, restoreRecoveryWords, recoveryWordsToBytes, recoveryWordsFromBytes, RECOVERY_WORDS_VERSION, RECOVERY_HEADER_WORDS (`nsec-tree@alpha`) | Yes |
+| `nsec-tree/recovery` | createMnemonicRecoveryWords, createNsecRecoveryWords, decodeRecoveryWords, restoreRecoveryWords, recoveryWordsToBytes, recoveryWordsFromBytes, RECOVERY_WORDS_VERSION, RECOVERY_HEADER_WORDS (from `1.6.0`) | Yes |
 | `nsec-tree/encoding` | encodeNsec, decodeNsec, encodeNpub, decodeNpub | No |
 
 Use `nsec-tree/core` if you only need nsec-based derivation. It avoids pulling in BIP-32/39 dependencies.
