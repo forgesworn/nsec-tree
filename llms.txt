@@ -4,18 +4,17 @@
 
 nsec-tree is for Nostr application developers who need per-purpose or per-context identities — social, commerce, fleet management, throwaway — all recoverable from a single mnemonic or existing nsec. Unlike random key generation, every identity is deterministic and recoverable. Each identity is named by a readable purpose, and child identities are unlinkable by default.
 
-> **Alpha:** ForgeSworn Recovery Words v1 is available in `1.6.0-alpha.1` for integration testing. Its automated cross-language vectors pass, but the full Heartwood hardware recovery ceremony has not run. Use test keys and keep an independent backup.
+> **Alpha:** ForgeSworn Recovery Words v1 (`nsec-tree/recovery`, from `1.6.0`) is for integration testing. Its automated cross-language vectors pass, but the full Heartwood hardware recovery ceremony has not run. Use test keys and keep an independent backup.
 
 Zero custom crypto. All primitives from audited @noble/@scure libraries.
 
 ## Getting Started
 
 ```bash
-npm install nsec-tree          # the `latest` dist-tag
-npm install nsec-tree@alpha    # 1.6.0-alpha.1, needed for nsec-tree/recovery
+npm install nsec-tree
 ```
 
-`npm install nsec-tree` resolves to the `latest` dist-tag. This repository's `package.json` is `1.6.0-alpha.1` with `publishConfig.tag` set to `alpha`, so the alpha does not move `latest`. The last stable release tag is `v1.5.1`, which has no `nsec-tree/recovery` subpath. `deriveRendezvous` landed on `main` after the `v1.6.0-alpha.1` tag, so it is in neither release.
+`nsec-tree/recovery` and `deriveRendezvous` need `1.6.0` or later; `1.5.1` and earlier have neither.
 
 The mnemonic below is the public BIP-39 test vector. Never use it for real keys.
 
@@ -40,7 +39,7 @@ root.destroy() // zero secret material
 - **Linkage proof**: `LinkageProof { masterPubkey, childPubkey, purpose?, index?, attestation, signature }`. The pubkeys are 64-char lowercase hex x-only keys, `attestation` is the signed UTF-8 string, `signature` is 128-char lowercase hex BIP-340 Schnorr. Blind proofs carry the master and child public keys but omit `purpose` and `index`, so they hide the derivation slot (not the master pubkey); full proofs include both.
 - **NIP-78 events**: linkage proofs can be published to Nostr as Kind 30078 application-specific data, making key relationships discoverable on-protocol.
 - **Recovery**: scan known purpose strings (`recover`, default scan range 20) or persona names (`recoverPersonas`, default scan range 1) to re-derive identities from the master secret. `scanRange` is an integer from 1 to 10,000.
-- **Recovery words** (`1.6.0-alpha.1`, `nsec-tree/recovery`): typed, versioned word sequences with a public fingerprint. `restoreRecoveryWords` returns `RestoredRecovery`: either `{ type: 'tree-root', source: 'mnemonic' | 'nsec', version: 1, fingerprint, root: TreeRoot }` or `{ type: 'raw-nsec', version: 1, fingerprint, npub, privateKey: Uint8Array }`, where the caller must zero `privateKey`. See RECOVERY.md.
+- **Recovery words** (`nsec-tree/recovery`, from `1.6.0`): typed, versioned word sequences with a public fingerprint. `restoreRecoveryWords` returns `RestoredRecovery`: either `{ type: 'tree-root', source: 'mnemonic' | 'nsec', version: 1, fingerprint, root: TreeRoot }` or `{ type: 'raw-nsec', version: 1, fingerprint, npub, privateKey: Uint8Array }`, where the caller must zero `privateKey`. See RECOVERY.md.
 - **Errors**: validation failures throw `NsecTreeError` (extends `Error`, `name` is `'NsecTreeError'`), exported from `nsec-tree` and `nsec-tree/core`. `verifyProof` returns `false` for malformed proofs instead of throwing.
 
 ## API Surface
@@ -50,7 +49,7 @@ root.destroy() // zero secret material
 | `fromMnemonic(mnemonic, passphrase?)` | `nsec-tree` | Create TreeRoot from BIP-39 mnemonic |
 | `fromNsec(nsec)` | `nsec-tree/core` | Create TreeRoot from bech32 nsec or raw 32-byte key |
 | `derive(root, purpose, index?)` | `nsec-tree/core` | Derive a child Identity |
-| `deriveRendezvous(root, index?)` | `nsec-tree/core` | Derive the root-only `rendezvous` child (on `main`, not in the published `1.6.0-alpha.1`) |
+| `deriveRendezvous(root, index?)` | `nsec-tree/core` | Derive the root-only `rendezvous` child (from `1.6.0`) |
 | `deriveFromIdentity(identity, purpose, index?)` | `nsec-tree` | Derive child from any Identity (arbitrary-depth hierarchies). Not in `nsec-tree/core` |
 | `recover(root, purposes, scanRange?)` | `nsec-tree/core` | Scan purposes x indices for recovery. Default scanRange 20 |
 | `zeroise(identity)` | `nsec-tree/core` | Zero the private key bytes |
@@ -62,7 +61,7 @@ root.destroy() // zero secret material
 | `recoverPersonas(root, names?, scanRange?)` | `nsec-tree/persona` | Recover personas by scanning known names. `names` defaults to `DEFAULT_PERSONA_NAMES`; `scanRange` defaults to 1 (index 0 only) |
 | `toUnsignedEvent(proof)` | `nsec-tree/event` | Convert LinkageProof to unsigned NIP-78 Kind 30078 event |
 | `fromEvent(event)` | `nsec-tree/event` | Extract LinkageProof from a NIP-78 event |
-| `createMnemonicRecoveryWords(mnemonic, passphrase?)` | `nsec-tree/recovery` | Wrap a BIP-39 mnemonic in typed recovery words (`1.6.0-alpha.1`) |
+| `createMnemonicRecoveryWords(mnemonic, passphrase?)` | `nsec-tree/recovery` | Wrap a BIP-39 mnemonic in typed recovery words (from `1.6.0`) |
 | `createNsecRecoveryWords(nsec, mode)` | `nsec-tree/recovery` | Wrap a raw nsec; `mode` is `'raw'` (exact key) or `'tree'` (nsec-tree v1) |
 | `decodeRecoveryWords(words)` | `nsec-tree/recovery` | Decode and checksum without deriving a key; returns a secret `payload` to zero |
 | `restoreRecoveryWords(words, passphrase?)` | `nsec-tree/recovery` | Validate and restore; returns `RestoredRecovery` |
@@ -73,7 +72,7 @@ root.destroy() // zero secret material
 | `encodeNpub(bytes)` | `nsec-tree/encoding` | Encode raw bytes to bech32 npub |
 | `decodeNpub(npub)` | `nsec-tree/encoding` | Decode bech32 npub to raw bytes |
 
-Subpath exports (BIP-32/39 dependencies only where noted): `nsec-tree` (full API, BIP deps), `nsec-tree/core` (fromNsec, derive, deriveRendezvous, RENDEZVOUS_PURPOSE, recover, zeroise, NsecTreeError, constants, TreeRoot and Identity types; no BIP deps; not deriveFromIdentity), `nsec-tree/mnemonic` (fromMnemonic only, BIP deps), `nsec-tree/proof` (proofs only), `nsec-tree/persona` (persona hierarchy), `nsec-tree/event` (NIP-78 event conversion), `nsec-tree/recovery` (typed recovery words, BIP deps, `nsec-tree@alpha`), `nsec-tree/encoding` (NIP-19 bech32 helpers).
+Subpath exports (BIP-32/39 dependencies only where noted): `nsec-tree` (full API, BIP deps), `nsec-tree/core` (fromNsec, derive, deriveRendezvous, RENDEZVOUS_PURPOSE, recover, zeroise, NsecTreeError, constants, TreeRoot and Identity types; no BIP deps; not deriveFromIdentity), `nsec-tree/mnemonic` (fromMnemonic only, BIP deps), `nsec-tree/proof` (proofs only), `nsec-tree/persona` (persona hierarchy), `nsec-tree/event` (NIP-78 event conversion), `nsec-tree/recovery` (typed recovery words, BIP deps, from `1.6.0`), `nsec-tree/encoding` (NIP-19 bech32 helpers).
 
 Without BIP deps, the equivalent of `deriveFromIdentity(parent, purpose)` is `derive(fromNsec(parent.privateKey), purpose)` from `nsec-tree/core`; call `destroy()` on the intermediate root afterwards. The `Uint8Array` input is not zeroed, so `parent` stays usable. `deriveFromPersona` in `nsec-tree/persona` does the same for personas.
 

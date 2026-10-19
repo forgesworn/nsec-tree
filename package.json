@@ -1,6 +1,6 @@
 {
   "name": "nsec-tree",
-  "version": "1.6.0-alpha.1",
+  "version": "1.6.0",
   "description": "Deterministic Nostr sub-identity derivation from a single master secret",
   "author": "forgesworn",
   "type": "module",
@@ -53,8 +53,7 @@
     "llms-full.txt"
   ],
   "publishConfig": {
-    "provenance": true,
-    "tag": "alpha"
+    "provenance": true
   },
   "scripts": {
     "build": "tsc",

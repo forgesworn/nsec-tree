@@ -1,9 +1,9 @@
 # nsec-tree
 
-> **Alpha:** ForgeSworn Recovery Words v1 is available in
-> `1.6.0-alpha.1` for integration testing. Its automated cross-language vectors
-> pass, but the full Heartwood hardware recovery ceremony has not run. Use test
-> keys and keep an independent backup.
+> **Alpha:** ForgeSworn Recovery Words v1 (`nsec-tree/recovery`, from `1.6.0`)
+> is for integration testing. Its automated cross-language vectors pass, but the
+> full Heartwood hardware recovery ceremony has not run. Use test keys and keep
+> an independent backup.
 
 > Deterministic Nostr identity hierarchies. One master secret, unlimited identities.
 
@@ -12,16 +12,11 @@
 [![Context7](https://img.shields.io/badge/Context7-indexed-blue)](https://context7.com/forgesworn/nsec-tree)
 
 ```
-npm install nsec-tree          # the `latest` dist-tag
-npm install nsec-tree@alpha    # 1.6.0-alpha.1, needed for `nsec-tree/recovery`
+npm install nsec-tree
 ```
 
-`npm install nsec-tree` resolves to the `latest` dist-tag. This repository's
-`package.json` is `1.6.0-alpha.1` with `publishConfig.tag` set to `alpha`, so
-the alpha does not move `latest`. The last stable release tag here is `v1.5.1`,
-which has no `nsec-tree/recovery` subpath: install `nsec-tree@alpha` to use the
-recovery words shown below. `deriveRendezvous` landed on `main` after the
-`v1.6.0-alpha.1` tag, so it is in neither of those releases.
+`nsec-tree/recovery` and `deriveRendezvous` need `1.6.0` or later; `1.5.1` and
+earlier have neither.
 
 ESM-only. Zero custom crypto — all primitives from @noble/@scure.
 
@@ -89,7 +84,7 @@ root.destroy()
 
 ### Make self-describing recovery words
 
-Needs `nsec-tree@alpha` (see Install).
+Needs `1.6.0` or later.
 
 ```typescript
 import { derive } from 'nsec-tree'
@@ -212,8 +207,7 @@ persona. Rotate it by incrementing `index`; provision the private half only by
 an authenticated private device flow, then call `zeroise()` on the temporary
 identity. This helper does not create a pairing link or export a private key.
 It is exported from `nsec-tree` and `nsec-tree/core`, together with
-`RENDEZVOUS_PURPOSE` (`'rendezvous'`). It was added to `main` after the
-`v1.6.0-alpha.1` tag, so the published `1.6.0-alpha.1` and `1.5.1` do not have it.
+`RENDEZVOUS_PURPOSE` (`'rendezvous'`). It was added in `1.6.0`.
 
 ### `deriveFromIdentity(identity, purpose, index?)`
 
@@ -243,7 +237,7 @@ Derive personas for each name at indices `0` to `scanRange - 1`, returning `Map<
 
 ### Recovery words
 
-Available in `nsec-tree@alpha` (`1.6.0-alpha.1`), from `nsec-tree/recovery`.
+From `nsec-tree/recovery`, in `1.6.0` and later.
 
 | Function | Returns |
 |----------|---------|
@@ -311,7 +305,7 @@ Extract a `LinkageProof` from a NIP-78 event's tags. Pass the result to `verifyP
 | `nsec-tree/proof` | Linkage proofs | No |
 | `nsec-tree/persona` | Persona derivation, two-level hierarchy, recovery | No |
 | `nsec-tree/event` | NIP-78 event conversion (toUnsignedEvent, fromEvent) | No |
-| `nsec-tree/recovery` | Typed recovery creation, compacting, and restore (`nsec-tree@alpha`) | Yes |
+| `nsec-tree/recovery` | Typed recovery creation, compacting, and restore (from `1.6.0`) | Yes |
 | `nsec-tree/encoding` | NIP-19 bech32 helpers (encodeNsec, decodeNsec, encodeNpub, decodeNpub) | No |
 
 Use `nsec-tree/core` if you only need nsec-based derivation. It avoids pulling in BIP-32/39 dependencies.

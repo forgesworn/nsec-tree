@@ -13,10 +13,8 @@ npm run typecheck  # type-check without emitting
 
 Requires Node.js 22+ (`engines` in `package.json`; CI tests Node 22 and 24).
 
-`npm install nsec-tree` resolves to the `latest` dist-tag, but `package.json` is a
-prerelease (`1.6.0-alpha.1`) with `publishConfig.tag` set to `alpha`. Install
-`nsec-tree@alpha` to get `nsec-tree/recovery`. `deriveRendezvous` landed on
-`main` after the `v1.6.0-alpha.1` tag, so no published release has it yet.
+`nsec-tree/recovery` and `deriveRendezvous` first shipped in `1.6.0`. The
+Recovery Words v1 format is still alpha: see RECOVERY.md.
 
 ## Architecture
 
@@ -54,7 +52,7 @@ src/
 - `nsec-tree/proof` -- linkage proofs only
 - `nsec-tree/persona` -- persona derivation, hierarchy, recovery
 - `nsec-tree/event` -- NIP-78 event conversion
-- `nsec-tree/recovery` -- ForgeSworn recovery-word creation, decoding, and restore (BIP deps; `nsec-tree@alpha`)
+- `nsec-tree/recovery` -- ForgeSworn recovery-word creation, decoding, and restore (BIP deps; from `1.6.0`)
 - `nsec-tree/encoding` -- NIP-19 bech32 helpers
 
 ## Conventions
