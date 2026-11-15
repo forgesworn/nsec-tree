@@ -15,11 +15,59 @@ record**. B's original raw key and npub are preserved. A alone cannot recover
 an unrelated B. Existing frozen derivation and Recovery Words vectors were
 not changed.
 
-Sapwood, Bark, Cambium and heartwood-esp32 are unchanged. The ESP32 checkout
-already had divergent local/upstream history; Cambium had unrelated changes.
-Firmware slot approval, raw-mode restore, capability negotiation and physical
-recovery remain future work under the documented contract. No hardware backup
-or inherited app permission is claimed.
+At the software preview release, Sapwood, Bark, Cambium and heartwood-esp32
+were unchanged. The hardware continuation below is a separate change. No
+physical recovery acceptance or inherited app permission is claimed.
+
+## Hardware continuation
+
+Heartwood firmware and Sapwood now have paired `feat/wrapped-nsec-device`
+branches for an authenticated, USB-only wrap/check/restore ceremony. Firmware
+advertises `wrapped_nsec_usb_v1`; each operation shows the full root and target
+npubs, requires all three approval pages and a fresh five-second physical hold.
+Raw secrets stay on the device. Sapwood downloads ciphertext and requires a
+saved-file check before enabling restore for that same root/file/expected npub.
+
+* [heartwood-esp32 #309](https://github.com/forgesworn/heartwood-esp32/pull/309),
+  draft at `a44431e`: device codec, frame contract, approval and storage.
+* [Sapwood #200](https://github.com/forgesworn/sapwood/pull/200), draft at
+  `9bf6dc4`: owner controls, exact receipt checks and saved-file restore gate.
+
+Local verification passed 1,419 Heartwood host unit tests plus integration
+tests, the firmware-backend codec/storage tests, all 49 panel-preview tests,
+all 1,374 Sapwood tests, Svelte checks and a production build. Chrome exercised
+the simulated-device UI at 390 pixels from the committed Sapwood revision.
+This is browser layout/API evidence, not physical-device evidence. The
+T-Display release build succeeded; its 2,335,088-byte application fits the
+3,145,728-byte slot. Hosted checks are attached to the paired PRs.
+
+Restore accepts only the next empty raw-key slot, refuses existing master or
+persona npubs, clears stale pairing/delegate state, verifies stored fields and
+publishes the slot count last. New-slot restore while at-rest seed encryption
+is active is refused; PIN/vault configuration is never disabled automatically.
+The format fixture is unchanged and matches the published TypeScript/Rust
+reference. See Heartwood's `WRAPPED-NSEC-USB.md` and Sapwood's
+`docs/wrapped-account-review.md` for the contract and review steps.
+
+Bark and Cambium need no new API for this USB-only path. Their app/identity
+approval boundaries remain unchanged. Bark's existing 160 background tests
+passed; Cambium was inspected read-only because it has unrelated work in
+progress. Bray's published owner CLI/SDK remains the software path and adds no
+recovery MCP tool.
+
+**Physical gate:** live hardware has not been opened, flashed, reset or
+provisioned during this work and must remain untouched. Physical OLED/button,
+reboot/signing and bench power-cut
+acceptance need a separate disposable board with verified independent recovery.
+The firmware and Sapwood changes remain draft work pending that evidence;
+no new firmware release or Sapwood deployment is claimed. Independent security
+review remains pending too.
+
+Retained hardware-preview evidence is under
+`/tmp/wrapped-device-preview-20261115/`: the application image and source
+identity, rendered approval pages, the exact-commit Chrome capture, test
+receipts and CI links. No worktree, emulator or long-running fixture was
+created for this continuation.
 
 ## Dependency and release gate
 
@@ -32,7 +80,7 @@ preview without independent security review or physical recovery acceptance.
 Both consumers now pin the published artifact's actual integrity. Bray's
 locked install passed with a new, empty npm cache; Signet's normal locked
 registry install and Git contacts prepare build passed. Both consumer PR gates
-passed before merge. Hardware implementation remains a separate future change.
+passed before merge. The hardware continuation is a separate unreleased change.
 
 Public releases:
 
