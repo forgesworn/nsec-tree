@@ -1,6 +1,6 @@
 {
   "name": "nsec-tree",
-  "version": "1.6.0",
+  "version": "1.7.0-alpha.1",
   "description": "Deterministic Nostr sub-identity derivation from a single master secret",
   "author": "forgesworn",
   "type": "module",
@@ -39,6 +39,10 @@
       "types": "./dist/event-barrel.d.ts",
       "import": "./dist/event-barrel.js"
     },
+    "./wrapped": {
+      "types": "./dist/wrapped.d.ts",
+      "import": "./dist/wrapped.js"
+    },
     "./recovery": {
       "types": "./dist/recovery.d.ts",
       "import": "./dist/recovery.js"
@@ -49,10 +53,12 @@
     "LICENSE",
     "PROTOCOL.md",
     "RECOVERY.md",
+    "WRAPPED-NSEC.md",
     "llms.txt",
     "llms-full.txt"
   ],
   "publishConfig": {
+    "tag": "alpha",
     "provenance": true
   },
   "scripts": {
@@ -64,6 +70,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@noble/ciphers": "^2.4.0",
     "@noble/curves": "^2.0.1",
     "@noble/hashes": "^2.0.1",
     "@scure/base": "^2.0.0",

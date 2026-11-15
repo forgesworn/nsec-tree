@@ -1,3 +1,12 @@
+## [1.7.0-alpha.1](https://github.com/forgesworn/nsec-tree/compare/v1.6.0...v1.7.0-alpha.1) (2026-11-15)
+
+* Add opt-in `nsec-tree/wrapped`: authenticated encrypted backups of existing
+  raw keys using a separate HKDF domain and Noble AES-256-GCM.
+* Preserve imported identity provenance: recovery requires the same root and
+  an encrypted record. Existing derivations and Recovery Words are unchanged.
+* Specify the preview format, public test vector and ecosystem custody contract
+  in `WRAPPED-NSEC.md`. Hardware operations are not implemented by this release.
+
 ## [1.6.0](https://github.com/forgesworn/nsec-tree/compare/v1.5.1...v1.6.0) (2026-10-19)
 
 Promotes `1.6.0-alpha.1` to `latest`, with the changes below. The ForgeSworn

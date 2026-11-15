@@ -20,6 +20,14 @@ earlier have neither.
 
 ESM-only. Zero custom crypto — all primitives from @noble/@scure.
 
+### Existing unrelated accounts (alpha preview)
+
+`nsec-tree/wrapped` in the `1.7.0-alpha.1` candidate can encrypt an existing
+raw nsec under a separate key derived from your tree root. It keeps the exact
+npub and needs **both the root backup and an encrypted file** to recover it.
+It does not make the key a derived child. See [WRAPPED-NSEC.md](WRAPPED-NSEC.md)
+for the API, preview status and hardware integration contract.
+
 **Discuss:** [NIP-IDENTITY-TREES draft](https://github.com/forgesworn/nip-drafts/blob/main/nips/NIP-IDENTITY-TREES.md) · [FAQ](docs/faq.md) · **Nostr:** [`npub1mgvlrnf5hm9yf0n5mf9nqmvarhvxkc6remu5ec3vf8r0txqkuk7su0e7q2`](https://njump.me/npub1mgvlrnf5hm9yf0n5mf9nqmvarhvxkc6remu5ec3vf8r0txqkuk7su0e7q2)
 
 ## Why nsec-tree?
@@ -306,6 +314,7 @@ Extract a `LinkageProof` from a NIP-78 event's tags. Pass the result to `verifyP
 | `nsec-tree/persona` | Persona derivation, two-level hierarchy, recovery | No |
 | `nsec-tree/event` | NIP-78 event conversion (toUnsignedEvent, fromEvent) | No |
 | `nsec-tree/recovery` | Typed recovery creation, compacting, and restore (from `1.6.0`) | Yes |
+| `nsec-tree/wrapped` | wrapNsec, unwrapNsec: opt-in encrypted raw-key recovery (alpha preview) | No |
 | `nsec-tree/encoding` | NIP-19 bech32 helpers (encodeNsec, decodeNsec, encodeNpub, decodeNpub) | No |
 
 Use `nsec-tree/core` if you only need nsec-based derivation. It avoids pulling in BIP-32/39 dependencies.
