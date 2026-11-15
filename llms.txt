@@ -81,3 +81,13 @@ Without BIP deps, the equivalent of `deriveFromIdentity(parent, purpose)` is `de
 - [PROTOCOL.md](https://github.com/forgesworn/nsec-tree/blob/main/PROTOCOL.md): Full derivation specification with byte-level format and frozen test vectors
 - [llms-full.txt](https://github.com/forgesworn/nsec-tree/blob/main/llms-full.txt): Comprehensive reference with all types, constants, derivation protocol details, and security model
 - [README.md](https://github.com/forgesworn/nsec-tree/blob/main/README.md): Quick start, API reference, security model
+
+## Existing unrelated keys (unreleased 1.7.0-alpha.1 preview)
+
+`nsec-tree/wrapped` exports `wrapNsec(root, privateKey): Promise<string>` and
+`unwrapNsec(root, record, expectedNpub?): Promise<UnwrappedNsec>`. This preserves
+an imported raw key, not derivation provenance. Recovery needs the same root
+construction AND the encrypted record. Zeroise returned privateKey bytes.
+The bounded, authenticated NSTW v1 format uses Noble HKDF-SHA256/AES-256-GCM.
+No public account association or upload is created. See WRAPPED-NSEC.md for the
+format, custody rules, vectors, preview status and hardware gates.
