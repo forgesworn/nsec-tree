@@ -4,7 +4,7 @@ An existing, unrelated Nostr key can be **recoverable with a tree root and an
 encrypted record**. It is imported, never derived. Its exact nsec and npub
 stay the same. Existing derivations, proofs and Recovery Words are unchanged.
 
-This is an unpublished preview, not an independently reviewed format. Keep
+This is an alpha preview, not an independently reviewed format. Keep
 an independent backup of the imported key while evaluating it with test keys.
 Automated interoperability does not establish hardware recovery acceptance.
 

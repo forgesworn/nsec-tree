@@ -1,4 +1,4 @@
-## 1.7.0-alpha.1 (unreleased)
+## [1.7.0-alpha.1](https://github.com/forgesworn/nsec-tree/compare/v1.6.0...v1.7.0-alpha.1) (2026-11-15)
 
 * Add opt-in `nsec-tree/wrapped`: authenticated encrypted backups of existing
   raw keys using a separate HKDF domain and Noble AES-256-GCM.

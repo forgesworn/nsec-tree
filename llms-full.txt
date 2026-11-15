@@ -334,7 +334,7 @@ Signed with BIP-340 Schnorr using the tree root secret.
 - [NIP-IDENTITY-TREES](https://github.com/forgesworn/nip-drafts/blob/main/nips/NIP-IDENTITY-TREES.md): Formal NIP draft specification (published in forgesworn/nip-drafts)
 - [README.md](https://github.com/forgesworn/nsec-tree/blob/main/README.md): Quick start, API reference, security model
 
-## Existing unrelated keys (unreleased 1.7.0-alpha.1 preview)
+## Existing unrelated keys (1.7.0-alpha.1 preview)
 
 `nsec-tree/wrapped` exports `wrapNsec(root, privateKey): Promise<string>` and
 `unwrapNsec(root, record, expectedNpub?): Promise<UnwrappedNsec>`. This preserves

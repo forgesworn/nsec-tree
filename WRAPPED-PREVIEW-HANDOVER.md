@@ -23,7 +23,7 @@ or inherited app permission is claimed.
 
 ## Dependency and release gate
 
-Nothing has been published, pushed, merged or deployed by this task. Consumer
+Delivery has resumed: the Rust reference is pushed for review; the library alpha is being prepared for publication. Consumer branches remain unmerged until the published package is verified. Consumer
 manifests pin the candidate `1.7.0-alpha.1`. Their lock entries record the
 **locally packed** candidate's integrity at the intended registry URL; that
 does not mean the package exists in the registry. Clean registry installs and
@@ -36,7 +36,7 @@ Retained local package evidence:
 * `/tmp/wrapped-nsec-preview-20261115/nsec-tree-1.7.0-alpha.1.tgz`
 * `/tmp/wrapped-nsec-preview-20261115/pack.json`
 * SHA-512 integrity:
-  `sha512-+gxDBJ+BqzcANukC1CVdR5ghg2Hfnc8qtpeKaat6w2KCnmdYIqAH9as5B+uf8wEFu2PRi0b59vUn87Zaawwt2Q==`
+  `sha512-GV0/x9T/bjCqyo1q1HVnJo8AAaFE+Apc7LMvnI1PhLW5PsRhCUUxIzLUTEwChGBrk4TwCNuoZ+HY7Vp5ddMDQg==`
 
 The package was built from a clean `dist/`, inspected and installed locally
 into both consumers. It contains the wrapped subpath and its specification;
