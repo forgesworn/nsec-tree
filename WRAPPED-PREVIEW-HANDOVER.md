@@ -29,7 +29,8 @@ Raw secrets stay on the device. Sapwood downloads ciphertext and requires a
 saved-file check before enabling restore for that same root/file/expected npub.
 
 * [heartwood-esp32 #309](https://github.com/forgesworn/heartwood-esp32/pull/309),
-  draft at `a44431e`: device codec, frame contract, approval and storage.
+  draft at `7387d03`: device codec, frame contract, approval, storage and
+  explicit AES/GHASH/POLYVAL erasure features.
 * [Sapwood #200](https://github.com/forgesworn/sapwood/pull/200), draft at
   `9bf6dc4`: owner controls, exact receipt checks and saved-file restore gate.
 
@@ -38,7 +39,7 @@ tests, the firmware-backend codec/storage tests, all 49 panel-preview tests,
 all 1,374 Sapwood tests, Svelte checks and a production build. Chrome exercised
 the simulated-device UI at 390 pixels from the committed Sapwood revision.
 This is browser layout/API evidence, not physical-device evidence. The
-T-Display release build succeeded; its 2,335,088-byte application fits the
+T-Display release build succeeded; its 2,335,184-byte application fits the
 3,145,728-byte slot. Hosted checks are attached to the paired PRs.
 
 Restore accepts only the next empty raw-key slot, refuses existing master or
