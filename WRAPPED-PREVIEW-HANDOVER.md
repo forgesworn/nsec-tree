@@ -89,6 +89,13 @@ passed. npm tarball bytes and provenance metadata were read back. The alpha
 tag is `1.7.0-alpha.1`; stable `latest` remains `1.6.0`. This is still a test-key
 preview without independent security review or physical recovery acceptance.
 
+The [external security review brief](WRAPPED-SECURITY-REVIEW.md) pins the six
+software/device source candidates, review questions, existing findings and
+required report. The owner has no spare board; physical testing stays deferred
+and the only live signer remains untouched. Independent review is reserved
+for an external security specialist. No reviewer has been contacted and no
+independent approval is claimed.
+
 Both consumers now pin the published artifact's actual integrity. Bray's
 locked install passed with a new, empty npm cache; Signet's normal locked
 registry install and Git contacts prepare build passed. Both consumer PR gates
