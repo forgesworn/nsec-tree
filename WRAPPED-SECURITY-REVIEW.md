@@ -4,10 +4,14 @@ Prepared 16 November 2026. External review has not been commissioned or
 completed. This brief identifies the review candidates; it is not security
 approval. Use public disposable keys and retain their independent backups.
 
-The owner has no spare signer. The only live signer must remain untouched.
-Heartwood firmware and Sapwood stay draft pending physical acceptance on a
-separate disposable board. No reviewer contact, release or deployment is
-authorised by this brief.
+The owner has no spare signer. After confirming verified independent recovery
+for every stored identity, the owner separately authorised an app-only preview
+installation on the connected T-Display. Installed-byte, partition-table,
+identity and offline-signing checks passed; the delivery handover records the
+evidence and exact rollback. No wrapped-key recovery was attempted. Heartwood
+firmware and Sapwood stay draft pending full recovery acceptance on a separate
+disposable board. No reviewer contact or public release is authorised by this
+brief; independent review remains pending.
 
 ## Recovery claim and scope
 
@@ -95,7 +99,8 @@ Owner-held evidence is retained in `/tmp/wrapped-review-20261116/`,
 `/tmp/wrapped-nsec-preview-20261115/`. These are local paths, not public downloads.
 The exact-source T-Display app is 2,256,624 bytes, SHA-256
 `b5ffeb6f10c700f6608804b5ca3fb104505c562fceeb035279790dfb017bb153`.
-It has not been flashed as part of this work.
+It is now installed on the owner's T-Display under that separate authorisation;
+this is a preview installation, not a public firmware release.
 
 ## Required review outcome and remaining gates
 
@@ -106,9 +111,11 @@ or unavailable evidence and which format/custody claims the review supports.
 Report vulnerabilities privately through [SECURITY.md](SECURITY.md), rather
 than a public issue. No clean bill of health is inferred from missing findings.
 
-Physical OLED/button, cancel/timeout/preheld-button, USB-only/Wi-Fi, real
-remove/restore, reboot/signing, uncertain-ack restart, power-cut atomicity and
-sealed-state checks remain pending on a separate disposable board. The pinned
-Heartwood review contains the acceptance table. Signet's Android document
+The full wrapped-account OLED/button ceremony, cancel/timeout/preheld-button,
+USB-only/Wi-Fi wrapping, real remove/restore, reboot/signing with restored B,
+uncertain-ack restart, power-cut atomicity and sealed-state checks remain
+pending on a separate disposable board. The pinned Heartwood review contains
+the acceptance table. The successful existing-identity signing check after
+installation does not fulfil those recovery gates. Signet's Android document
 save/restore ceremony on a physical phone also remains pending. Code review,
 host tests and mobile-viewport browser captures do not fulfil those checks.

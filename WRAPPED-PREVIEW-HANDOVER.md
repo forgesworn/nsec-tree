@@ -67,13 +67,36 @@ passed; Cambium was inspected read-only because it has unrelated work in
 progress. Bray's published owner CLI/SDK remains the software path and adds no
 recovery MCP tool.
 
-**Physical gate:** live hardware has not been opened, flashed, reset or
-provisioned during this work and must remain untouched. Physical OLED/button,
-reboot/signing and bench power-cut
-acceptance need a separate disposable board with verified independent recovery.
-The firmware and Sapwood changes remain draft work pending that evidence;
-no new firmware release or Sapwood deployment is claimed. Independent security
-review remains pending too.
+**Owner-authorised installation, 16 November:** after confirming verified
+independent recovery for every stored identity, the owner authorised an
+app-only preview update on the connected T-Display. Source `ef13faf` now runs
+as `0.18.0-beta.40` with `wrapped_nsec_usb_v1`. The 2,256,624-byte CI image,
+SHA-256 `b5ffeb6f10c700f6608804b5ca3fb104505c562fceeb035279790dfb017bb153`,
+was written at `0x10000` and independently verified on-device. The actual
+partition table matches the reviewed 4 MB layout and is byte-identical after
+the update; NVS and config sit outside the write and rounded erase range.
+
+The previous beta.39 differed from the public release asset, so its exact
+3 MiB application slot was captured and independently verified before writing.
+After reboot, the one original raw identity's public metadata, six-app count,
+at-rest mode and verified RNG status were retained. The owner approved an
+offline kind-1 signing check; an independent Nostr verifier confirmed the
+event hash, signature and exact original public key. Nothing was published.
+These checks do not compare every app policy or establish all client/relay
+behaviour. No identity was provisioned, removed or recovered.
+
+Installation, signed-event and rollback evidence is retained under
+`~/heartwood-bench/wrapped-update-20261116T100756Z/`, with
+`README.md` and `result.json` identifying the exact artifacts, prior probe
+failures and verification limits. All serial sessions and prompts are closed.
+
+**Remaining physical gate:** the full wrapped-account OLED/button ceremony,
+saved-file check, remove/restore, restored-key reboot/signing, uncertain-ack
+restart, sealed-state and bench power-cut acceptance still need a separate
+disposable board. This successful app update does not fulfil those gates.
+The firmware and Sapwood changes remain draft; no public firmware release or
+Sapwood deployment is claimed. External specialist security review remains
+pending.
 
 Retained hardware-preview evidence is under
 `/tmp/wrapped-device-preview-20261115/`: the application image and source
@@ -91,10 +114,11 @@ preview without independent security review or physical recovery acceptance.
 
 The [external security review brief](WRAPPED-SECURITY-REVIEW.md) pins the six
 software/device source candidates, review questions, existing findings and
-required report. The owner has no spare board; physical testing stays deferred
-and the only live signer remains untouched. Independent review is reserved
-for an external security specialist. No reviewer has been contacted and no
-independent approval is claimed.
+required report. The owner has no spare board; full wrapped-key recovery
+testing stays deferred. The owner separately authorised the non-destructive
+preview installation and offline signing check recorded above. Independent
+review is reserved for an external security specialist. No reviewer has been
+contacted and no independent approval is claimed.
 
 Both consumers now pin the published artifact's actual integrity. Bray's
 locked install passed with a new, empty npm cache; Signet's normal locked
