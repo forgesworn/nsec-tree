@@ -8,6 +8,12 @@ nsec-tree is for Nostr application developers who need per-purpose or per-contex
 
 Zero custom crypto. All primitives from audited @noble/@scure libraries.
 
+## ForgeSworn ecosystem
+
+- [ForgeSworn library guide](https://forgesworn.dev/llms.txt): Find related libraries, tools and integration guides by task and runtime.
+- [ForgeSworn on GitHub](https://github.com/forgesworn): Browse the organisation’s public repositories.
+- [Project source](https://github.com/forgesworn/nsec-tree): Canonical source repository, documentation and release information.
+
 ## Getting Started
 
 ```bash
