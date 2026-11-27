@@ -3,7 +3,7 @@ nsec-tree Derivation Protocol
 
 Deterministic Nostr sub-identity derivation via HMAC-SHA256.
 
-`v1.1` `stable`
+`v1.2` `stable`
 
 ## Abstract
 
@@ -173,10 +173,32 @@ implementation that exposes a dedicated "persona" operation MUST construct this
 exact purpose string — so a persona derived in one tool reproduces byte-for-byte
 in every other.
 
-`nostr:persona:` is the ONLY purpose namespace reserved by this specification.
+`nostr:persona:` and `signet:vault:` (§3.2) are reserved namespaces.
 Every other purpose string is raw and application-defined. In particular, the
 raw purpose `social` and the persona `nostr:persona:social` are **different
 identities** and MUST NOT be conflated.
+
+### 3.2 Signet private datasets
+
+`signet:vault:` is reserved for Signet private-state keys. Derive directly from
+the tree root using the complete raw purpose, never through persona derivation.
+The derivation algorithm and all existing identity keys remain unchanged.
+
+Purposes: `signet:vault:profiles`, `signet:vault:contacts:owner`,
+`signet:vault:contacts:dependant-N`, `signet:vault:contacts:bots`,
+`signet:vault:credentials`, and `signet:vault:settings`.
+
+`N` MUST be the dependant's existing unsigned 32-bit ordinal (0 to
+4,294,967,295 inclusive), written in canonical decimal. Zero is `0` and other
+values have no leading zeros. The uint32 derivation index is the rotation index.
+Index `0` is the initial key and higher indices are successive rotations.
+Rotation discovery is an application recovery contract. Use these keys only
+for private datasets, outside the public persona and typed identity registries.
+
+The [vault test fixture](test/fixtures/signet-vault-v1.json) records each kind
+of purpose at indices 0 and 1, including dependants 0 and 1. Its public test
+input is a 32-byte nsec filled with `0x01`, passed through the nsec root
+derivation in §1.2.
 
 ## 4. Curve Order Handling
 
@@ -513,11 +535,11 @@ Source: https://github.com/forgesworn/nsec-tree
 
 ## Versioning
 
-This document is versioned as `v1.1`. The version covers:
+This document is versioned as `v1.2`. The version covers:
 - Tree root derivation (mnemonic path and nsec path)
 - Child key derivation (HMAC message format)
 - Purpose string validation rules
-- Reserved purpose namespaces (personas, §3.1)
+- Reserved purpose namespaces (§3.1 and §3.2)
 - Linkage proof attestation formats
 - Test vectors
 
@@ -528,3 +550,6 @@ without a version bump.
 `v1.1` added the reserved `nostr:persona:` namespace (§3.1) and Vector 6. This
 is purely additive — it names an existing raw-purpose derivation and changes no
 prior output — so any `v1.0` implementation remains conformant.
+
+`v1.2` reserves the `signet:vault:` namespace (§3.2) and adds the Signet vault
+fixture using the existing derivation algorithm.
