@@ -1,6 +1,6 @@
 {
   "name": "nsec-tree",
-  "version": "1.7.0-alpha.1",
+  "version": "1.7.0-alpha.2",
   "description": "Deterministic Nostr sub-identity derivation from a single master secret",
   "author": "forgesworn",
   "type": "module",
@@ -54,6 +54,7 @@
     "PROTOCOL.md",
     "RECOVERY.md",
     "WRAPPED-NSEC.md",
+    "test/fixtures/signet-vault-v1.json",
     "llms.txt",
     "llms-full.txt"
   ],
@@ -65,7 +66,7 @@
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:vectors": "vitest run test/vectors.test.ts",
+    "test:vectors": "vitest run test/vectors.test.ts test/vault-vectors.test.ts",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
