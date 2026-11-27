@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest'
 
 describe('subpath exports', () => {
+  it('wrapped exports only the opt-in raw-key backup functions', async () => {
+    const mod = await import('../src/wrapped.js')
+    expect(Object.keys(mod).sort()).toEqual(['unwrapNsec', 'wrapNsec'])
+    const core = await import('../src/core.js')
+    expect(core).not.toHaveProperty('wrapNsec')
+  })
   it('index exports full API', async () => {
     const mod = await import('../src/index.js')
     expect(mod.fromNsec).toBeDefined()

@@ -1,4 +1,6 @@
 export { fromNsec } from './root-nsec.js'
+export { wrapNsec, unwrapNsec } from './wrapped.js'
+export type { UnwrappedNsec } from './wrapped.js'
 export { fromMnemonic } from './root-mnemonic.js'
 export { derive, zeroise } from './derive.js'
 export { deriveRendezvous, RENDEZVOUS_PURPOSE } from './rendezvous.js'
